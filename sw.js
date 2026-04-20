@@ -1,12 +1,11 @@
 // Service Worker — Agent Agenda PWA
 const CACHE = 'agent-agenda-v1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap',
+  '/Agent-Agenda-GG/',
+  '/Agent-Agenda-GG/index.html',
+  '/Agent-Agenda-GG/manifest.json',
+  '/Agent-Agenda-GG/icons/icon-192.png',
+  '/Agent-Agenda-GG/icons/icon-512.png',
 ];
 
 // Installation — mise en cache des ressources statiques
