@@ -379,7 +379,7 @@ function goTo(n,btn){
   const now=new Date();
   const m={dash:['d-day','d-date'],semaine:['sd-day','sd-date'],projets:['pd-day','pd-date'],reglages:['rd-day','rd-date']};
   if(m[n])setHdr(m[n][0],m[n][1],now);
-  if(n==='semaine'&&S.bl.length===0)loadSem();
+  if(n==='semaine')loadSem();
   if(n==='projets'&&S.pr.length===0)loadPr();
   if(n==='reglages')loadReg();
 }
