@@ -347,7 +347,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
         <div class="fgrp"><label class="flbl">Fin</label><input id="pf-fn" type="date" class="fi"></div>
       </div>
       <div class="fgrp"><label class="flbl">Couleur</label><div class="cg" id="cgrid"></div></div>
-      <div class="fgrp"><label class="flbl">Contraintes</label><input id="pf-co" type="text" class="fi" placeholder="tt_uniquement, sans_swann…"></div>
+      <div class="fgrp">
+  <label class="flbl">Contraintes</label>
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="co-checks">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" value="sans_swann"> sans Swann</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" value="avec_swann"> avec Swann</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" value="tt_uniquement"> TT uniquement</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" value="sans_tt"> sans TT</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" value="weekend_seulement"> weekend seul.</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer"><input type="checkbox" value="semaine_seulement"> semaine seul.</label>
+    </div>
+    <input id="pf-co-custom" type="text" class="fi" placeholder="Contrainte personnalisée…">
+  </div>
+</div>
       <div class="fgrp"><label class="flbl">Notes</label><textarea id="pf-no" class="fta" placeholder="Notes libres…"></textarea></div>
       <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
         <button class="btn bcu bfl" onclick="saveProj()">Sauvegarder</button>
@@ -531,7 +544,10 @@ function openMP(nom){
   document.getElementById('pf-dw').value=p?.duree_weekend||'90';
   document.getElementById('pf-db').value=p?.date_debut||'';
   document.getElementById('pf-fn').value=p?.date_fin||'';
-  document.getElementById('pf-co').value=p?.contraintes||'';
+  const coVal=p?.contraintes||'';
+document.querySelectorAll('#co-checks input').forEach(cb=>{cb.checked=coVal.includes(cb.value);});
+const custom=coVal.split(',').map(s=>s.trim()).filter(s=>s&&!['sans_swann','avec_swann','tt_uniquement','sans_tt','weekend_seulement','semaine_seulement'].includes(s)).join(', ');
+document.getElementById('pf-co-custom').value=custom;
   document.getElementById('pf-no').value=p?.notes||'';
   S.cs=p?.couleur||'2';buildCG();
   document.getElementById('bdel').style.display=p?'block':'none';
@@ -544,7 +560,7 @@ function pc(id,el){S.cs=id;document.querySelectorAll('.cs').forEach(s=>s.classLi
 async function saveProj(){
   const nom=document.getElementById('pf-nom').value.trim();
   if(!nom){toast('❌ Nom requis',true);return;}
-  const r=await gas('save_projet',{projet:{nom,couleur:S.cs,emoji:document.getElementById('pf-em').value.trim(),categorie:document.getElementById('pf-cat').value,statut:document.getElementById('pf-st').value,priorite:document.getElementById('pf-pr').value,mode:document.getElementById('pf-mo').value,duree_session:document.getElementById('pf-du').value,duree_weekend:document.getElementById('pf-dw').value,date_debut:document.getElementById('pf-db').value,date_fin:document.getElementById('pf-fn').value,contraintes:document.getElementById('pf-co').value,notes:document.getElementById('pf-no').value}});
+  const r=await gas('save_projet',{projet:{nom,couleur:S.cs,emoji:document.getElementById('pf-em').value.trim(),categorie:document.getElementById('pf-cat').value,statut:document.getElementById('pf-st').value,priorite:document.getElementById('pf-pr').value,mode:document.getElementById('pf-mo').value,duree_session:document.getElementById('pf-du').value,duree_weekend:document.getElementById('pf-dw').value,date_debut:document.getElementById('pf-db').value,date_fin:document.getElementById('pf-fn').value,contraintes:[...document.querySelectorAll('#co-checks input:checked')].map(cb=>cb.value).concat(document.getElementById('pf-co-custom').value.trim()?[document.getElementById('pf-co-custom').value.trim()]:[]).join(', '),notes:document.getElementById('pf-no').value}});
   if(r.success){toast('✅ Sauvegardé');cm('m-proj');S.pr=[];loadPr();}else toast('❌ '+(r.error||'Erreur'),true);
 }
 
