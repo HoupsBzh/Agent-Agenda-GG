@@ -514,9 +514,13 @@ function renderPr(){
       ${!(p.statut||'').toLowerCase().includes('termin')?`<span class="pcpr">P${p.priorite||'?'}</span>`:''}
     </div>
     <div class="pcb">
-      <button class="btn bgh bsm" onclick="openMP('${eq(p.nom)}')">✏️ Modifier</button>
-      ${p.notes?`<div class="pcnotes">${es(p.notes)}</div>`:''}
-    </div>`;
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="btn bgh bsm" onclick="openMP('${eq(p.nom)}')">✏️ Modifier</button>
+    <button class="btn bgh bsm" onclick="deplacerProjet('${eq(p.nom)}',-1)">▲</button>
+    <button class="btn bgh bsm" onclick="deplacerProjet('${eq(p.nom)}',1)">▼</button>
+  </div>
+  ${p.notes?`<div class="pcnotes">${es(p.notes)}</div>`:''}
+</div>;
     el.appendChild(card);
   });
 }
@@ -608,6 +612,26 @@ async function loadLogs(){
   const el=document.getElementById('logs-c');const r=await gas('get_logs');
   if(!r.success||!r.logs||!r.logs.length){el.innerHTML='<div style="padding:16px;text-align:center;font-size:12px;color:var(--muted)">Aucun log</div>';return;}
   el.innerHTML=r.logs.slice(0,10).map(l=>`<div class="lrow"><span class="lts">${l.timestamp}</span><span class="ln">${l.nbBlocs} blocs</span><span class="${l.statut==='OK'?'lok':'lerr'}">${l.statut}</span></div>`).join('');
+}
+
+async function deplacerProjet(nom, direction) {
+  const actifs = S.pr.filter(p => !(p.statut||'').toLowerCase().includes('termin'));
+  const idx = actifs.findIndex(p => p.nom === nom);
+  const cible = idx + direction;
+  if (cible < 0 || cible >= actifs.length) return;
+
+  const pA = actifs[idx];
+  const pB = actifs[cible];
+  const tmpPrio = pA.priorite;
+  pA.priorite = pB.priorite;
+  pB.priorite = tmpPrio;
+
+  await gas('save_projet', {projet: pA});
+  await gas('save_projet', {projet: pB});
+
+  S.pr = [];
+  loadPr();
+  toast('✅ Priorités mises à jour');
 }
 
 function om(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
