@@ -479,7 +479,7 @@ async function loadPr(){
   el.innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
   const r=await gas('get_projets');
   if(!r.success||!r.projets){el.innerHTML=emp('⚠️','Erreur','');return;}
-  S.pr=[...r.projets].sort((a,b)=>(parseInt(a.priorite)||99)-(parseInt(b.priorite)||99));
+  S.pr=[...r.projets].sort((a,b)=>{const at=(a.statut||'').toLowerCase().includes('termin');const bt=(b.statut||'').toLowerCase().includes('termin');if(at!==bt)return at?1:-1;return(parseInt(a.priorite)||99)-(parseInt(b.priorite)||99);});
   renderPr();
 }
 
@@ -498,7 +498,7 @@ function renderPr(){
       <span class="pcem">${p.emoji||'📌'}</span>
       <div class="pci"><div class="pcn">${es(p.nom)}</div><div class="pcm">${es(p.categorie||'')} · ${es(p.mode||'')} · ${p.duree_session||60}min</div></div>
       <span class="badge ${sb.c}">${sb.l}</span>
-      <span class="pcpr">P${p.priorite||'?'}</span>
+      ${!(p.statut||'').toLowerCase().includes('termin')?`<span class="pcpr">P${p.priorite||'?'}</span>`:''}
     </div>
     <div class="pcb">
       <button class="btn bgh bsm" onclick="openMP('${eq(p.nom)}')">✏️ Modifier</button>
