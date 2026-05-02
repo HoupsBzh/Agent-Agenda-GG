@@ -762,9 +762,10 @@ function getColorForLabel(label){
 }
 
 function cleSemaineJS(d){
-  const date=new Date(d);const day=date.getDay();
-  const diff=day===0?-6:1-day; // lundi=début de semaine
-  date.setDate(date.getDate()+diff);date.setHours(0,0,0,0);
+  const date=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  const day=date.getDay(); // 0=dim, 1=lun...
+  const diff=day===0?-6:1-day; // ramène au lundi
+  date.setDate(date.getDate()+diff);
   return iso(date);
 }
   
@@ -825,6 +826,7 @@ function renderStats(){
   const offset=Math.round(188.5*(1-pct/100));
 
   // Projets de cette semaine
+  const parProjet=d.par_projet||{};
   const labels=Object.keys(parProjet).filter(l=>{
   const h=parProjet[l]||[];
   const w=h[idx]||{planifies:0};
