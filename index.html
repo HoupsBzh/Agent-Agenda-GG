@@ -165,6 +165,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .berr{background:#3d1010;color:#c45050;border:1px solid #5a2020}
 .bsm{padding:6px 13px;font-size:12px;border-radius:6px}
 .bfl{width:100%}
+.bamber{background:#3d2e08;color:#c4a030;border:1px solid #5a4410}
+.bblue{background:#0d2030;color:#6a9ab8;border:1px solid #1a3a50}
 
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
 .bgr{background:#1a3d28;color:#4aae68;border:1px solid #2a5035}
@@ -241,11 +243,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
   </div>
   <div style="height:14px"></div>
   <div class="frow">
-    <button class="fchip active" onclick="filtrer('tous',this)">Tous</button>
-    <button class="fchip" onclick="filtrer('cours',this)">En cours</button>
-    <button class="fchip" onclick="filtrer('demarr',this)">À démarrer</button>
-    <button class="fchip" onclick="filtrer('termin',this)">Terminés</button>
-  </div>
+  <button class="fchip active" onclick="filtrer('tous',this)">Tous</button>
+  <button class="fchip" onclick="filtrer('actifs',this)">Actifs</button>
+  <button class="fchip" onclick="filtrer('pause',this)">Pause/Veille</button>
+  <button class="fchip" onclick="filtrer('termin',this)">Terminés</button>
+</div>
   <div id="plist" class="stg"></div>
   <button class="fab" id="fab" onclick="openMP(null)">+</button>
 </div>
@@ -487,7 +489,7 @@ function filtrer(f,el){pf=f;document.querySelectorAll('.fchip').forEach(c=>c.cla
 
 function renderPr(){
   const el=document.getElementById('plist');
-  const list=pf==='tous'?S.pr:S.pr.filter(p=>(p.statut||'').toLowerCase().includes(pf));
+  const list=pf==='tous'?S.pr:pf==='actifs'?S.pr.filter(p=>{const s=(p.statut||'').toLowerCase();return s.includes('cours')||s.includes('demarr');}):S.pr.filter(p=>(p.statut||'').toLowerCase().includes(pf));
   if(!list.length){el.innerHTML=emp('📭','Vide','Aucun projet ici');return;}
   el.innerHTML='';
   list.forEach(p=>{
@@ -507,8 +509,16 @@ function renderPr(){
   });
 }
 
-function sbadge(s){s=(s||'').toLowerCase();if(s.includes('cours'))return{c:'bgr',l:'En cours'};if(s.includes('demarr'))return{c:'bcu2',l:'À démarrer'};return{c:'bgy',l:s||'—'};}
-
+function sbadge(s){
+  s=(s||'').toLowerCase();
+  if(s.includes('cours'))  return{c:'bgr',  l:'En cours'};
+  if(s.includes('demarr')) return{c:'bcu2', l:'À démarrer'};
+  if(s.includes('pause'))  return{c:'bamber',l:'En pause'};
+  if(s.includes('veille')) return{c:'bblue', l:'En veille'};
+  if(s.includes('termin')) return{c:'bgy',  l:'Terminé'};
+  return{c:'bgy',l:s||'—'};
+}
+  
 function openMP(nom){
   S.en=nom||null;const p=nom?S.pr.find(x=>x.nom===nom):null;
   document.getElementById('mp-t').textContent=p?'✏️ Modifier':'✦ Nouveau projet';
