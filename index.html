@@ -509,7 +509,7 @@ function renderPr(){
     const card=document.createElement('div');card.className='pcard';card.style.borderLeftColor=color;
     card.innerHTML=`<div class="pch" onclick="this.closest('.pcard').classList.toggle('exp')">
       <span class="pcem">${p.emoji||'📌'}</span>
-      <div class="pci"><div class="pcn">${es(p.nom)}</div><div class="pcm">${es(p.categorie||'')} · ${es(p.mode||'')} · ${p.duree_session||60}min</div></div>
+      <div class="pci"><div class="pcn">${es(p.nom)}</div><div class="pcm">${es(p.categorie||'')}${(p.mode||'').toLowerCase()==='one-shot'?' · one-shot':''}${p.duree_session&&(p.mode||'').toLowerCase()!=='one-shot'?' · '+p.duree_session+'min':''}${p.date_debut?' · dès '+p.date_debut:''}${p.date_fin?' · fin '+p.date_fin:''}</div></div>
       <span class="badge ${sb.c}">${sb.l}</span>
       ${!(p.statut||'').toLowerCase().includes('termin')?`<span class="pcpr">P${p.priorite||'?'}</span>`:''}
     </div>
