@@ -515,10 +515,10 @@ function renderPr(){
     </div>
     <div class="pcb">
   <div style="display:flex;gap:8px;align-items:center;">
-    <button class="btn bgh bsm" onclick="openMP('${eq(p.nom)}')">✏️ Modifier</button>
+    <button class="btn bgh bsm" style="flex:1" onclick="openMP('${eq(p.nom)}')">✏️ Modifier</button>
     <button class="btn bgh bsm" onclick="deplacerProjet('${eq(p.nom)}',-1)">▲</button>
     <button class="btn bgh bsm" onclick="deplacerProjet('${eq(p.nom)}',1)">▼</button>
-  </div>
+</div>
   ${p.notes?`<div class="pcnotes">${es(p.notes)}</div>`:''}
 </div>`;
     el.appendChild(card);
