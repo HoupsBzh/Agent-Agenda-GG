@@ -761,6 +761,13 @@ function getColorForLabel(label){
   return GC['2'];
 }
 
+function cleSemaineJS(d){
+  const date=new Date(d);const day=date.getDay();
+  const diff=day===0?-6:1-day; // lundi=début de semaine
+  date.setDate(date.getDate()+diff);date.setHours(0,0,0,0);
+  return iso(date);
+}
+  
 async function loadStats(){
   if(S.statsData){renderStats();return;}
   document.getElementById('stats-body').innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
@@ -775,7 +782,9 @@ async function loadStats(){
     return;
   }
   S.statsData=r;
-  S.statsWkIdx=Math.max(0,(r.semaines||[]).length-1);
+  const todayKey=cleSemaineJS(new Date());
+S.statsWkIdx=(r.semaines||[]).findIndex(s=>s.num===todayKey);
+if(S.statsWkIdx<0)S.statsWkIdx=Math.max(0,(r.semaines||[]).length-1);
   renderStats();
 }
 
@@ -816,12 +825,14 @@ function renderStats(){
   const offset=Math.round(188.5*(1-pct/100));
 
   // Projets de cette semaine
-  const parProjet=d.par_projet||{};
   const labels=Object.keys(parProjet).filter(l=>{
-    const h=parProjet[l]||[];
-    const w=h[idx]||{planifies:0};
-    return w.planifies>0;
-  });
+  const h=parProjet[l]||[];
+  const w=h[idx]||{planifies:0};
+  if(w.planifies===0) return false;
+  const p=S.pr.find(x=>l.includes(x.nom)||x.nom.includes(l));
+  if(p&&(p.mode||'').toLowerCase()==='one-shot') return false;
+  return true;
+});
 
   // Construire le HTML du body
   let html='';
@@ -915,7 +926,7 @@ function buildSpark(containerId,hist,color,selectedIdx){
     const shadow=isSel?`box-shadow:0 0 5px ${color}60`:'';
     const col=document.createElement('div');
     col.className='spkcol';
-    col.innerHTML=`<div class="spkwrap"><div class="spkbar" style="height:${barH}px;background:${color};opacity:${opacity};${shadow}"></div></div><span class="spklbl${isSel?' scur':''}">${wnFromKey(w.num)}</span>`;
+col.innerHTML=`<div class="spkwrap"><div class="spkbar" style="height:${barH}px;background:${color};opacity:${opacity};${shadow}"></div></div>`;
     el.appendChild(col);
   });
 }
