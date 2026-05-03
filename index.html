@@ -797,6 +797,9 @@ function statsNav(dir){
   renderStats();
 }
 
+const ROUTINES=['Sport','Menage','Ménage','Lecture','Masque LED','Confiance en soi','TikTok KDP'];
+function isRoutine(label){return ROUTINES.some(function(r){return label.includes(r);});}
+  
  function emojiLabel(label){
   const map={'Sport':'\uD83C\uDFCB','Menage':'\uD83E\uDDF9','Ménage':'\uD83E\uDDF9',
     'TikTok KDP':'\uD83D\uDCF1','Lecture':'\uD83D\uDCDA'};
@@ -805,6 +808,28 @@ function statsNav(dir){
   for(var k in map){if(label.includes(k)) return map[k]+' '+label;}
   return label;
 } 
+
+function buildProjBar(label,pid,parProjet,idx){
+  const hist=parProjet[label]||[];
+  const w=hist[idx]||{planifies:0,realises:0,heures:0,pct:-1};
+  const p2=w.pct>=0?w.pct:0;
+  const color=getColorForLabel(label);
+  return `<div class="stpcard" id="${pid}" style="border-left-color:${color}">
+    <div class="stphead" onclick="toggleStp('${pid}')">
+      <div class="stptop">
+        <div class="stpname">${es(emojiLabel(label))}</div>
+        <div class="stpright"><div class="stppct">${p2}%</div><span class="stpchev">›</span></div>
+      </div>
+      <div class="stptrack"><div class="stpfill" style="width:${p2}%;background:${color}"></div></div>
+      <div class="stpmeta"><span>${w.realises} réalisé${w.realises>1?'s':''} · ${w.planifies} planifié${w.planifies>1?'s':''}</span><span class="stph">${fmtH(w.heures)}</span></div>
+    </div>
+    <div class="stpdetail" id="det-${pid}">
+      <div class="stpdttl">8 dernières semaines</div>
+      <div class="stpspark" id="spk-${pid}"></div>
+      <div class="stpleg"><span><span class="stpdot" style="background:${color}"></span>Réalisé · barre claire = semaine sélectionnée</span></div>
+    </div>
+  </div>`;
+}
   
 function renderStats(){
   const d=S.statsData;
@@ -845,6 +870,8 @@ function renderStats(){
   if(p&&(p.mode||'').toLowerCase()==='one-shot') return false;
   return true;
 });
+const projLabels=labels.filter(l=>!isRoutine(l));
+const routLabels=labels.filter(l=>isRoutine(l));
 
   // Construire le HTML du body
   let html='';
@@ -871,34 +898,25 @@ function renderStats(){
 
   // Projets
   if(labels.length){
+  if(projLabels.length){
     html+=`<div style="font-size:9px;font-weight:600;color:var(--muted2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;padding:0 16px">Par projet</div>`;
-    html+=`<div style="padding:0 16px" id="st-proj-list">`;
-    labels.forEach(function(label,li){
-      const hist=parProjet[label]||[];
-      const w=hist[idx]||{planifies:0,realises:0,heures:0,pct:-1};
-      const p2=w.pct>=0?w.pct:0;
-      const color=getColorForLabel(label);
-      const pid='stp'+li;
-      html+=`<div class="stpcard" id="${pid}" style="border-left-color:${color}">
-        <div class="stphead" onclick="toggleStp('${pid}')">
-          <div class="stptop">
-            <div class="stpname">${es(emojiLabel(label))}</div>
-            <div class="stpright"><div class="stppct">${p2}%</div><span class="stpchev">›</span></div>
-          </div>
-          <div class="stptrack"><div class="stpfill" style="width:${p2}%;background:${color}"></div></div>
-          <div class="stpmeta"><span>${w.realises} réalisé${w.realises>1?'s':''} · ${w.planifies} planifié${w.planifies>1?'s':''}</span><span class="stph">${fmtH(w.heures)}</span></div>
-        </div>
-        <div class="stpdetail" id="det-${pid}">
-          <div class="stpdttl">8 dernières semaines</div>
-          <div class="stpspark" id="spk-${pid}"></div>
-          <div class="stpleg"><span><span class="stpdot" style="background:${color}"></span>Réalisé · barre claire = semaine sélectionnée</span></div>
-        </div>
-      </div>`;
+    html+=`<div style="padding:0 16px">`;
+    projLabels.forEach(function(label,li){
+      html+=buildProjBar(label,'proj'+li,parProjet,idx);
+    });
+    html+=`</div><div style="height:14px"></div>`;
+  }
+  if(routLabels.length){
+    html+=`<div style="font-size:9px;font-weight:600;color:var(--muted2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;padding:0 16px">Par routine</div>`;
+    html+=`<div style="padding:0 16px">`;
+    routLabels.forEach(function(label,li){
+      html+=buildProjBar(label,'rout'+li,parProjet,idx);
     });
     html+=`</div>`;
-  } else {
-    html+=emp('📊','Aucun bloc marqué cette semaine','Appuie sur Réalisé ou Reporté depuis l\'onglet Semaine');
   }
+} else {
+  html+=emp('📊','Aucun bloc marqué cette semaine','Appuie sur Réalisé ou Reporté depuis l\'onglet Semaine');
+}
 
   // Moyennes long terme
   html+=`<div style="height:16px"></div>
@@ -914,11 +932,12 @@ function renderStats(){
   body.innerHTML=html;
 
   // Construire les sparklines après insertion dans le DOM
-  labels.forEach(function(label,li){
-    const hist=parProjet[label]||[];
-    const color=getColorForLabel(label);
-    buildSpark('spk-stp'+li,hist,color,idx);
-  });
+  [...projLabels,...routLabels].forEach(function(label,li){
+  const pid=li<projLabels.length?'proj'+li:'rout'+(li-projLabels.length);
+  const hist=parProjet[label]||[];
+  const color=getColorForLabel(label);
+  buildSpark('spk-'+pid,hist,color,idx);
+});
 }
 
 function toggleStp(id){
