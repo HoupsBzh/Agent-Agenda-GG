@@ -797,6 +797,15 @@ function statsNav(dir){
   renderStats();
 }
 
+ function emojiLabel(label){
+  const map={'Sport':'\uD83C\uDFCB','Menage':'\uD83E\uDDF9','Ménage':'\uD83E\uDDF9',
+    'TikTok KDP':'\uD83D\uDCF1','Lecture':'\uD83D\uDCDA'};
+  const p=S.pr.find(x=>label.includes(x.nom)||x.nom.includes(label));
+  if(p&&p.emoji) return p.emoji+' '+label;
+  for(var k in map){if(label.includes(k)) return map[k]+' '+label;}
+  return label;
+} 
+  
 function renderStats(){
   const d=S.statsData;
   const semaines=d.semaines||[];
@@ -816,7 +825,7 @@ function renderStats(){
   }
 
   const sem=semaines[idx]||{planifies:0,realises:0,reportes:0,heures:0,pct:0,num:''};
-  const isCurrent=idx===semaines.length-1;
+  const isCurrent=sem.num===cleSemaineJS(new Date());
 
   // Sélecteur semaine
   document.getElementById('st-wk-lbl').textContent='Semaine '+wnFromKey(sem.num)+(isCurrent?' — en cours':'');
@@ -873,7 +882,7 @@ function renderStats(){
       html+=`<div class="stpcard" id="${pid}" style="border-left-color:${color}">
         <div class="stphead" onclick="toggleStp('${pid}')">
           <div class="stptop">
-            <div class="stpname">${es((S.pr.find(x=>label.includes(x.nom)||x.nom.includes(label))?.emoji||'')+' '+label)}</div>
+            <div class="stpname">${es(emojiLabel(label))}</div>
             <div class="stpright"><div class="stppct">${p2}%</div><span class="stpchev">›</span></div>
           </div>
           <div class="stptrack"><div class="stpfill" style="width:${p2}%;background:${color}"></div></div>
