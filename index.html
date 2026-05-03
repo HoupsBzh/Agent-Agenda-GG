@@ -266,6 +266,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .avg-lbl{font-size:9px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
 .avg-val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--muted2);line-height:1}
 .avg-sub{font-size:10px;color:var(--muted);margin-top:3px}
+/* ── Splash screen ── */
+#splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity .5s ease;pointer-events:none}
+#splash.hide{opacity:0}
+#splash.gone{display:none}
+.sp-icon{animation:spIn .6s cubic-bezier(.34,1.56,.64,1) both}
+.sp-name{font-family:'Cinzel',serif;font-size:28px;font-weight:700;letter-spacing:.15em;color:var(--text);animation:spIn .6s .15s cubic-bezier(.34,1.56,.64,1) both}
+.sp-sub{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);animation:spIn .6s .25s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes spIn{from{opacity:0;transform:scale(.88) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 </style>
 </head>
 <body>
