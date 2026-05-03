@@ -1,13 +1,13 @@
 {
-  "name": "Agent Agenda IA",
-  "short_name": "AgentAgenda",
-  "description": "Planning automatique IA — blocs de temps intelligents",
+  "name": "Kern",
+  "short_name": "Kern",
+  "description": "Agent agenda IA — blocs de temps intelligents",
   "start_url": "/Agent-Agenda-GG/",
   "scope": "/Agent-Agenda-GG/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#0b0b14",
-  "background_color": "#0b0b14",
+  "theme_color": "#0f0c0a",
+  "background_color": "#0f0c0a",
   "lang": "fr",
   "icons": [
     {
@@ -29,6 +29,5 @@
       "purpose": "any"
     }
   ],
-  "screenshots": [],
   "categories": ["productivity", "utilities"]
 }
