@@ -784,6 +784,7 @@ async function loadStats(){
   }
   S.statsData=r;
   const todayKey=cleSemaineJS(new Date());
+  console.log('todayKey:', todayKey, 'semaines reçues:', (r.semaines||[]).map(s=>s.num));
 S.statsWkIdx=(r.semaines||[]).findIndex(s=>s.num===todayKey);
 if(S.statsWkIdx<0)S.statsWkIdx=Math.max(0,(r.semaines||[]).length-1);
   renderStats();
@@ -872,7 +873,7 @@ function renderStats(){
       html+=`<div class="stpcard" id="${pid}" style="border-left-color:${color}">
         <div class="stphead" onclick="toggleStp('${pid}')">
           <div class="stptop">
-            <div class="stpname">${es(label)}</div>
+            <div class="stpname">${es((S.pr.find(x=>label.includes(x.nom)||x.nom.includes(label))?.emoji||'')+' '+label)}</div>
             <div class="stpright"><div class="stppct">${p2}%</div><span class="stpchev">›</span></div>
           </div>
           <div class="stptrack"><div class="stpfill" style="width:${p2}%;background:${color}"></div></div>
