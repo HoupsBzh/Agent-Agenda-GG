@@ -577,6 +577,7 @@ function goTo(n,btn){
   const m={dash:['d-day','d-date'],semaine:['sd-day','sd-date'],projets:['pd-day','pd-date'],stats:['std-day','std-date'],reglages:['rd-day','rd-date']};
   if(m[n])setHdr(m[n][0],m[n][1],now);
   if(n==='semaine')loadSem();
+  if(n==='dash')loadToday();
   if(n==='projets'&&S.pr.length===0)loadPr();
   if(n==='reglages')loadReg();
   if(n==='stats')loadStats();
@@ -657,7 +658,7 @@ async function loadToday(){
   tb.forEach(function(b,i){
     // Conteneur externe fixe (comme .evc sur la page Semaine)
     const wrapper=document.createElement('div');
-    wrapper.style.cssText='position:relative;margin-bottom:5px;border-radius:var(--rs);overflow:hidden';
+    wrapper.style.cssText='position:relative;margin-bottom:5px;border-radius:var(--rs);overflow:clip;background:var(--card)';
     // Hints derrière
     const okHint=document.createElement('div');
     okHint.className='sw-ok';
