@@ -485,6 +485,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
       <div style="display:flex;flex-direction:column;gap:9px">
         <button class="btn bok bfl" onclick="marquer('Réalisé')">✅ Réalisé</button>
         <button class="btn bwarn bfl" onclick="marquer('Reporté')">⏭ Reporté</button>
+        <button class="btn bgh bfl" id="mq-retirer" style="display:none" onclick="marquer('')">✕ Retirer le statut</button>
         <button class="btn bgh bfl" onclick="cm('m-marq')">Annuler</button>
       </div>
     </div>
@@ -599,6 +600,21 @@ function initDash(){
 }
 
 function addSwipeDash(el, b, idx){
+  // Ajouter les hints visuels comme sur la page Semaine
+  const okHint=document.createElement('div');
+  okHint.style.cssText='position:absolute;top:0;left:0;bottom:0;width:50%;display:flex;align-items:center;padding-left:18px;font-size:12px;font-weight:600;color:var(--ok);opacity:0;pointer-events:none;z-index:0';
+  okHint.textContent='✅ Réalisé';
+  const repHint=document.createElement('div');
+  repHint.style.cssText='position:absolute;top:0;right:0;bottom:0;width:50%;display:flex;align-items:center;justify-content:flex-end;padding-right:18px;font-size:12px;font-weight:600;color:var(--warn);opacity:0;pointer-events:none;z-index:0';
+  repHint.textContent='⏭ Reporté';
+  el.appendChild(okHint);
+  el.appendChild(repHint);
+  // Envelopper le contenu existant dans un div z-index:1
+  const inner=document.createElement('div');
+  inner.style.cssText='display:contents;position:relative;z-index:1';
+  // Rendre le contenu du bloc relatif pour passer par-dessus les hints
+  el.style.position='relative';
+
   var x0=0, dx=0, swiping=false;
   const THRESH=72;
   el.addEventListener('touchstart',function(e){
@@ -610,9 +626,9 @@ function addSwipeDash(el, b, idx){
     if(Math.abs(dx)<8)return;
     swiping=true;
     el.style.transform='translateX('+(dx*0.72)+'px)';
-    const ratio=Math.min(1,Math.abs(dx)/THRESH);
-    if(dx>0) el.style.background='rgba(74,158,104,'+(ratio*0.18)+')';
-    else el.style.background='rgba(196,133,58,'+(ratio*0.18)+')';
+    const ratio=Math.min(1,Math.abs(dx)/THRESH).toFixed(2);
+    if(dx>0){okHint.style.opacity=ratio;repHint.style.opacity=0;}
+    else{repHint.style.opacity=ratio;okHint.style.opacity=0;}
   },{passive:true});
   el.addEventListener('touchend',function(){
     if(swiping&&Math.abs(dx)>=THRESH){
@@ -623,13 +639,13 @@ function addSwipeDash(el, b, idx){
       setTimeout(function(){
         el.classList.remove('snap');
         el.style.transform='';
-        el.style.background='';
+        okHint.style.opacity=0;repHint.style.opacity=0;
         marquerDash(b,act);
       },260);
     } else {
       el.classList.add('snap');
       el.style.transform='';
-      el.style.background='';
+      okHint.style.opacity=0;repHint.style.opacity=0;
     }
   });
 }
@@ -903,6 +919,7 @@ function openMQ(idx){
   if(!b||!b.is_agent)return;S.bm=b;
   document.getElementById('mq-t').textContent=b.titre;
   document.getElementById('mq-h').textContent=hm(b.debut)+' – '+hm(b.fin);
+  document.getElementById('mq-retirer').style.display=b.statut?'flex':'none';
   om('m-marq');
 }
 
@@ -910,9 +927,10 @@ async function marquer(st){
   const b=S.bm;if(!b)return;
   const r=await gas('marquer_tache',{key:b.key,statut:st,titre:b.titre});
   if(r.success){
-    toast(`${st==='Réalisé'?'✅':'⏭'} Marqué ${st}`);
+    if(st) toast(`${st==='Réalisé'?'✅':'⏭'} Marqué ${st}`);
+    else toast('✕ Statut retiré');
     b.statut=st;cm('m-marq');loadToday();
-    S.statsData=null; // invalider cache stats
+    S.statsData=null;
   } else toast('❌ Erreur',true);
 }
 
