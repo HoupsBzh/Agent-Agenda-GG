@@ -658,7 +658,7 @@ async function loadToday(){
   tb.forEach(function(b,i){
     // Conteneur externe fixe (comme .evc sur la page Semaine)
     const wrapper=document.createElement('div');
-    wrapper.style.cssText='position:relative;margin-bottom:5px;border-radius:var(--rs);overflow:clip;background:var(--card)';
+    wrapper.className='evc';
     // Hints derrière
     const okHint=document.createElement('div');
     okHint.className='sw-ok';
@@ -668,8 +668,8 @@ async function loadToday(){
     wrapper.appendChild(repHint);
     // Div interne qui translate (comme .evr)
     const inner=document.createElement('div');
-    inner.className='bloc';
-    inner.style.cssText='--color:'+gc(b)+';margin-bottom:0;position:relative;z-index:1;will-change:transform';
+    inner.className='evr';
+    inner.style.setProperty('--evc',gc(b));
     inner.innerHTML=`<div class="btime">${hm(b.debut)} – ${hm(b.fin)}<span class="bdur">${dm(b)}min</span></div>
     <div class="bname">${es(b.titre)}</div>
     ${b.statut?`<span class="bst">${b.statut==='Réalisé'?'✅':'⏭'}</span>`:''}`;
