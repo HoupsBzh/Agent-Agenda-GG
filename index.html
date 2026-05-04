@@ -599,52 +599,39 @@ function initDash(){
   loadToday();loadDP();loadLR();
 }
 
-function addSwipeDash(el, b, idx){
-  // Ajouter les hints visuels comme sur la page Semaine
-  const okHint=document.createElement('div');
-  okHint.style.cssText='position:absolute;top:0;left:0;bottom:0;width:50%;display:flex;align-items:center;padding-left:18px;font-size:12px;font-weight:600;color:var(--ok);opacity:0;pointer-events:none;z-index:0';
-  okHint.textContent='✅ Réalisé';
-  const repHint=document.createElement('div');
-  repHint.style.cssText='position:absolute;top:0;right:0;bottom:0;width:50%;display:flex;align-items:center;justify-content:flex-end;padding-right:18px;font-size:12px;font-weight:600;color:var(--warn);opacity:0;pointer-events:none;z-index:0';
-  repHint.textContent='⏭ Reporté';
-  el.appendChild(okHint);
-  el.appendChild(repHint);
-  // Envelopper le contenu existant dans un div z-index:1
-  const inner=document.createElement('div');
-  inner.style.cssText='display:contents;position:relative;z-index:1';
-  // Rendre le contenu du bloc relatif pour passer par-dessus les hints
-  el.style.position='relative';
-
+function addSwipeDash(wrapper, inner, b){
+  const okHint=wrapper.querySelector('.sw-ok');
+  const repHint=wrapper.querySelector('.sw-rep');
   var x0=0, dx=0, swiping=false;
   const THRESH=72;
-  el.addEventListener('touchstart',function(e){
+  inner.addEventListener('touchstart',function(e){
     x0=e.touches[0].clientX;dx=0;swiping=false;
-    el.classList.remove('snap');
+    inner.classList.remove('snap');
   },{passive:true});
-  el.addEventListener('touchmove',function(e){
+  inner.addEventListener('touchmove',function(e){
     dx=e.touches[0].clientX-x0;
     if(Math.abs(dx)<8)return;
     swiping=true;
-    el.style.transform='translateX('+(dx*0.72)+'px)';
+    inner.style.transform='translateX('+(dx*0.72)+'px)';
     const ratio=Math.min(1,Math.abs(dx)/THRESH).toFixed(2);
     if(dx>0){okHint.style.opacity=ratio;repHint.style.opacity=0;}
     else{repHint.style.opacity=ratio;okHint.style.opacity=0;}
   },{passive:true});
-  el.addEventListener('touchend',function(){
+  inner.addEventListener('touchend',function(){
     if(swiping&&Math.abs(dx)>=THRESH){
       const act=dx>0?'Réalisé':'Reporté';
-      el.classList.add('snap');
-      el.style.transform='translateX('+(dx>0?'110%':'-110%')+')';
+      inner.classList.add('snap');
+      inner.style.transform='translateX('+(dx>0?'110%':'-110%')+')';
       if(navigator.vibrate)navigator.vibrate(22);
       setTimeout(function(){
-        el.classList.remove('snap');
-        el.style.transform='';
+        inner.classList.remove('snap');
+        inner.style.transform='';
         okHint.style.opacity=0;repHint.style.opacity=0;
         marquerDash(b,act);
       },260);
     } else {
-      el.classList.add('snap');
-      el.style.transform='';
+      inner.classList.add('snap');
+      inner.style.transform='';
       okHint.style.opacity=0;repHint.style.opacity=0;
     }
   });
@@ -668,15 +655,27 @@ async function loadToday(){
   if(!tb.length){el.innerHTML=emp('✨','Journée libre','');return;}
   el.innerHTML='';
   tb.forEach(function(b,i){
-    const div=document.createElement('div');
-    div.className='bloc';
-    div.style.setProperty('--color',gc(b));
-    div.innerHTML=`<div class="btime">${hm(b.debut)} – ${hm(b.fin)}<span class="bdur">${dm(b)}min</span></div>
+    // Conteneur externe fixe (comme .evc sur la page Semaine)
+    const wrapper=document.createElement('div');
+    wrapper.style.cssText='position:relative;margin-bottom:5px;border-radius:var(--rs);overflow:hidden';
+    // Hints derrière
+    const okHint=document.createElement('div');
+    okHint.className='sw-ok';
+    const repHint=document.createElement('div');
+    repHint.className='sw-rep';
+    wrapper.appendChild(okHint);
+    wrapper.appendChild(repHint);
+    // Div interne qui translate (comme .evr)
+    const inner=document.createElement('div');
+    inner.className='bloc';
+    inner.style.cssText='--color:'+gc(b)+';margin-bottom:0;position:relative;z-index:1;will-change:transform';
+    inner.innerHTML=`<div class="btime">${hm(b.debut)} – ${hm(b.fin)}<span class="bdur">${dm(b)}min</span></div>
     <div class="bname">${es(b.titre)}</div>
     ${b.statut?`<span class="bst">${b.statut==='Réalisé'?'✅':'⏭'}</span>`:''}`;
-    div.addEventListener('click',function(){if(!div._swiped)openMQ(i);});
-    if(b.is_agent) addSwipeDash(div,b,i);
-    el.appendChild(div);
+    inner.addEventListener('click',function(){if(!b._swiping)openMQ(i);});
+    wrapper.appendChild(inner);
+    if(b.is_agent) addSwipeDash(wrapper,inner,b);
+    el.appendChild(wrapper);
   });
 }
 
