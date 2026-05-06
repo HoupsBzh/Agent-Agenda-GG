@@ -285,7 +285,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 @keyframes spIn{from{opacity:0;transform:scale(.88) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
 /* ── Pull-to-refresh ── */
-.ptr-zone{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:50;background:transparent}.ptr-zone.ptr-on{height:82px;padding-bottom:10px}
+.ptr-zone{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:50;background:var(--bg)}
 .ptr-zone.ptr-on{opacity:1}
 .ptr-inner{display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease}
 .ptr-zone.ptr-on .ptr-inner{opacity:1;transform:translateY(0)}
@@ -576,6 +576,7 @@ function goTo(n,btn){
   const now=new Date();
   const m={dash:['d-day','d-date'],semaine:['sd-day','sd-date'],projets:['pd-day','pd-date'],stats:['std-day','std-date'],reglages:['rd-day','rd-date']};
   if(m[n])setHdr(m[n][0],m[n][1],now);
+  ptrShow();
   if(n==='semaine')loadSem();
   if(n==='dash')loadToday();
   if(n==='projets'&&S.pr.length===0)loadPr();
@@ -649,24 +650,21 @@ async function marquerDash(b,st){
 async function loadToday(){
   const t=iso(new Date());const el=document.getElementById('tlist');
   const r=await gas('get_semaine',{debut:t,fin:t});
-  if(!r.success||!r.blocs){el.innerHTML=emp('⚠️','Erreur de connexion','Vérifiez le GAS');return;}
+  if(!r.success||!r.blocs){el.innerHTML=emp('⚠️','Erreur de connexion','Vérifiez le GAS');ptrHide();return;}
   S.bl=r.blocs;
   const tb=r.blocs.filter(b=>b.debut.slice(0,10)===t);
   document.getElementById('tcnt').textContent=tb.length?tb.length+' bloc'+(tb.length>1?'s':''):'';
-  if(!tb.length){el.innerHTML=emp('✨','Journée libre','');return;}
+  if(!tb.length){el.innerHTML=emp('✨','Journée libre','');ptrHide();return;}
   el.innerHTML='';
   tb.forEach(function(b,i){
     // Conteneur externe fixe (comme .evc sur la page Semaine)
     const wrapper=document.createElement('div');
     wrapper.className='evc';
-    wrapper.style.overflowX='clip';
     // Hints derrière
     const okHint=document.createElement('div');
     okHint.className='sw-ok';
-    okHint.textContent='✅ Réalisé';
     const repHint=document.createElement('div');
     repHint.className='sw-rep';
-    repHint.textContent='⏭ Reporté';
     wrapper.appendChild(okHint);
     wrapper.appendChild(repHint);
     // Div interne qui translate (comme .evr)
@@ -681,6 +679,7 @@ async function loadToday(){
     if(b.is_agent) addSwipeDash(wrapper,inner,b);
     el.appendChild(wrapper);
   });
+  ptrHide();
 }
 
 async function loadDP(){
@@ -739,8 +738,7 @@ async function loadSem(){
   const now=new Date();S.sd=iso(now);
   const pills=document.getElementById('wpills');pills.innerHTML='';
   const days=[];for(let i=0;i<7;i++){const d=new Date(now);d.setDate(now.getDate()+i);days.push(d);}
-  const zone=document.getElementById('ptr-zone');
-if(zone){zone.classList.add('ptr-on');}
+  document.getElementById('dview').innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
   const r=await gas('get_semaine',{debut:iso(days[0]),fin:iso(days[6])});
   if(r.success&&r.blocs)S.bl=r.blocs;
   const bd={};(r.blocs||[]).forEach(b=>{const d=b.debut.slice(0,10);bd[d]=(bd[d]||0)+1;});
@@ -752,7 +750,6 @@ if(zone){zone.classList.add('ptr-on');}
     pills.appendChild(pill);
   });
   renderDV(S.sd);
-  if(zone){setTimeout(()=>zone.classList.remove('ptr-on'),400);}
 }
 
 function addSwipe(evr, key, titre, ds){
@@ -836,9 +833,10 @@ async function loadPr(){
   const el=document.getElementById('plist');
   el.innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
   const r=await gas('get_projets');
-  if(!r.success||!r.projets){el.innerHTML=emp('⚠️','Erreur','');return;}
+  if(!r.success||!r.projets){el.innerHTML=emp('⚠️','Erreur','');ptrHide();return;}
   S.pr=[...r.projets].sort((a,b)=>{const at=(a.statut||'').toLowerCase().includes('termin');const bt=(b.statut||'').toLowerCase().includes('termin');if(at!==bt)return at?1:-1;return(parseInt(a.priorite)||99)-(parseInt(b.priorite)||99);});
   renderPr();
+  ptrHide();
 }
 
 let pf='tous';
@@ -944,6 +942,7 @@ async function loadReg(){
   document.getElementById('cfg-url').value=gu();
   const r=await gas('get_config');
   if(r.success&&r.config){document.getElementById('cfg-h').value=r.config.horizon||7;document.getElementById('cfg-tt').value=r.config.tt_declare||'';}
+  ptrHide();
   loadLogs();
 }
 
@@ -1002,7 +1001,7 @@ function cleSemaineJS(d){
 }
   
 async function loadStats(){
-  if(S.statsData){renderStats();return;}
+  if(S.statsData){renderStats();ptrHide();return;}
   document.getElementById('stats-body').innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
   // Charger projets si besoin (pour les couleurs)
   if(!S.pr.length){
@@ -1012,6 +1011,7 @@ async function loadStats(){
   const r=await gas('get_stats_hebdo');
   if(!r.success){
     document.getElementById('stats-body').innerHTML=emp('⚠️','Erreur de connexion','Vérifiez le GAS');
+    ptrHide();
     return;
   }
   S.statsData=r;
@@ -1020,6 +1020,7 @@ async function loadStats(){
 S.statsWkIdx=(r.semaines||[]).findIndex(s=>s.num===todayKey);
 if(S.statsWkIdx<0)S.statsWkIdx=Math.max(0,(r.semaines||[]).length-1);
   renderStats();
+  ptrHide();
 }
 
 function statsNav(dir){
@@ -1195,6 +1196,8 @@ col.innerHTML=`<div class="spkwrap"><div class="spkbar" style="height:${barH}px;
 }
 
 // ── Utilitaires ──
+function ptrShow(){const z=document.getElementById('ptr-zone');if(z)z.classList.add('ptr-on');}
+function ptrHide(){const z=document.getElementById('ptr-zone');if(z)z.classList.remove('ptr-on');}
 function om(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
 function cm(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
 document.querySelectorAll('.moverlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)cm(o.id);}));
