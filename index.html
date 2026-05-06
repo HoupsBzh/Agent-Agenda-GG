@@ -38,7 +38,7 @@
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;overscroll-behavior:none}
 #app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative}
 
-.screen{display:none;flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 8px);-webkit-overflow-scrolling:touch}
+.screen{display:none;flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 8px);-webkit-overflow-scrolling:touch;overscroll-behavior:none}
 .screen.active{display:flex;flex-direction:column;animation:sIn .22s ease both}
 @keyframes sIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
@@ -739,7 +739,8 @@ async function loadSem(){
   const now=new Date();S.sd=iso(now);
   const pills=document.getElementById('wpills');pills.innerHTML='';
   const days=[];for(let i=0;i<7;i++){const d=new Date(now);d.setDate(now.getDate()+i);days.push(d);}
-  document.getElementById('dview').innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
+  const zone=document.getElementById('ptr-zone');
+if(zone){zone.classList.add('ptr-on');}
   const r=await gas('get_semaine',{debut:iso(days[0]),fin:iso(days[6])});
   if(r.success&&r.blocs)S.bl=r.blocs;
   const bd={};(r.blocs||[]).forEach(b=>{const d=b.debut.slice(0,10);bd[d]=(bd[d]||0)+1;});
@@ -751,6 +752,7 @@ async function loadSem(){
     pills.appendChild(pill);
   });
   renderDV(S.sd);
+  if(zone){setTimeout(()=>zone.classList.remove('ptr-on'),400);}
 }
 
 function addSwipe(evr, key, titre, ds){
