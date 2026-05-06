@@ -765,8 +765,8 @@ async function loadToday(){
     const isCG=S.cgDates.includes(todayDs);
     const isFE=S.feDates.includes(todayDs);
     if(isFE) dashBanner.innerHTML='<div class="ctx-banner fe">🌴 <span>Jour Férié</span></div>';
-    else if(isCG) dashBanner.innerHTML='<div class="ctx-banner cg">🌴 <span>Congé</span><span class="cb-sub">Aujourd'hui</span></div>';
-    else if(isTT) dashBanner.innerHTML='<div class="ctx-banner tt">🏠 <span>Télétravail</span><span class="cb-sub">Aujourd'hui</span></div>';
+    else if(isCG) dashBanner.innerHTML='<div class="ctx-banner cg">🌴 <span>Congé</span><span class="cb-sub">Aujourd\u2019hui</span></div>';
+else if(isTT) dashBanner.innerHTML='<div class="ctx-banner tt">🏠 <span>Télétravail</span><span class="cb-sub">Aujourd\u2019hui</span></div>';
     else dashBanner.innerHTML='';
   }
   el.innerHTML='';
