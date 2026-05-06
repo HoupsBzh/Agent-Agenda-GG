@@ -398,11 +398,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     </div>
     <div class="hr"><div class="hday" id="d-day">—</div><div class="hdate" id="d-date">—</div></div>
   </div>
-  <div id="dash-ctx-banner"></div>
   <div class="run-card">
     <div><div class="ril">Planificateur</div><div class="rill">Dernier run · <span id="last-run">—</span></div></div>
     <button class="rbtn" id="rbtn" onclick="forcerRun()"><span id="rtxt">Lancer</span></button>
   </div>
+  <div id="dash-ctx-banner"></div>
   <div class="sgap"></div>
   <div class="sec"><div class="slbl">Aujourd'hui <span id="tcnt"></span></div><div id="tlist" class="stg"></div></div>
   <div class="sgap" style="height:40px"></div>
@@ -439,7 +439,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <button class="fchip" onclick="filtrer('termin',this)">Terminés</button>
   </div>
   <div id="plist" class="stg"></div>
-  <button class="fab" id="fab" onclick="openMP(null)">+</button>
 </div>
 
 <!-- ═══════════════ STATS ═══════════════ -->
@@ -567,6 +566,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <div class="ptr-name">KERN</div>
   </div>
 </div>
+<button class="fab" id="fab" onclick="openMP(null)">+</button>
 <nav id="nav">
   <button class="nav-btn active" onclick="goTo('dash',this)"><div class="ndash"></div><span>Acc.</span></button>
   <button class="nav-btn" onclick="goTo('semaine',this)"><div class="ndash"></div><span>Sem.</span></button>
@@ -678,7 +678,6 @@ function goTo(n,btn){
   const now=new Date();
   const m={dash:['d-day','d-date'],semaine:['sd-day','sd-date'],projets:['pd-day','pd-date'],stats:['std-day','std-date'],reglages:['rd-day','rd-date']};
   if(m[n])setHdr(m[n][0],m[n][1],now);
-  ptrShow();
   if(n==='semaine')loadSem();
   if(n==='dash')loadToday();
   if(n==='projets'&&S.pr.length===0)loadPr();
@@ -764,9 +763,9 @@ async function loadToday(){
     const isTT=S.ttDates.includes(todayDs);
     const isCG=S.cgDates.includes(todayDs);
     const isFE=S.feDates.includes(todayDs);
-    if(isFE) dashBanner.innerHTML='<div class="ctx-banner fe">🌴 <span>Jour Férié</span></div>';
-    else if(isCG) dashBanner.innerHTML='<div class="ctx-banner cg">🌴 <span>Congé</span><span class="cb-sub">Aujourd\u2019hui</span></div>';
-else if(isTT) dashBanner.innerHTML='<div class="ctx-banner tt">🏠 <span>Télétravail</span><span class="cb-sub">Aujourd\u2019hui</span></div>';
+    if(isFE) dashBanner.innerHTML='<div class="ctx-banner fe">\uD83C\uDF34 <span>Jour F\u00e9ri\u00e9</span></div>';
+    else if(isCG) dashBanner.innerHTML='<div class="ctx-banner cg">\uD83C\uDF34 <span>Cong\u00e9</span></div>';
+    else if(isTT) dashBanner.innerHTML='<div class="ctx-banner tt">\uD83C\uDFE0 <span>T\u00e9l\u00e9travail</span></div>';
     else dashBanner.innerHTML='';
   }
   el.innerHTML='';
@@ -774,11 +773,14 @@ else if(isTT) dashBanner.innerHTML='<div class="ctx-banner tt">🏠 <span>Télé
     // Conteneur externe fixe (comme .evc sur la page Semaine)
     const wrapper=document.createElement('div');
     wrapper.className='evc';
+    wrapper.style.overflowX='clip';
     // Hints derrière
     const okHint=document.createElement('div');
     okHint.className='sw-ok';
+    okHint.textContent='✅ Réalisé';
     const repHint=document.createElement('div');
     repHint.className='sw-rep';
+    repHint.textContent='⏭ Reporté';
     wrapper.appendChild(okHint);
     wrapper.appendChild(repHint);
     // Div interne qui translate (comme .evr)
@@ -945,8 +947,8 @@ function ctxBanner(ds){
   const isCG=S.cgDates.includes(ds);
   const isFE=S.feDates.includes(ds);
   if(isFE) return `<div class="ctx-banner fe">🌴 <span>Jour Férié</span></div>`;
-  if(isCG) return `<div class="ctx-banner cg">🌴 <span>Congé</span><span class="cb-sub">Blocs dès 12h</span></div>`;
-  if(isTT) return `<div class="ctx-banner tt">🏠 <span>Télétravail</span><span class="cb-sub">Blocs dès 17h15</span></div>`;
+  if(isCG) return `<div class="ctx-banner cg">🌴 <span>Congé</span></div>`;
+  if(isTT) return `<div class="ctx-banner tt">🏠 <span>Télétravail</span></div>`;
   return '';
 }
 
@@ -1226,13 +1228,19 @@ async function ttcgSave(){
   });
   if(!entrees.length){toast('Rien à sauvegarder');return;}
   const r=await gas('save_tt_conge',{entrees});
-  if(r.success){toast('✅ '+r.created+' entr\u00e9e(s) ajout\u00e9e(s) dans l\u2019agenda');}
+  if(r.success){toast('✅ '+r.created+' entrée(s) ajoutée(s) dans l'agenda');}
   else toast('❌ '+(r.error||'Erreur'),true);
 }
 
 // ── Réglages ──
 async function loadReg(){
   document.getElementById('cfg-url').value=gu();
+  const nowR=new Date();
+  const lunR=new Date(nowR);lunR.setDate(nowR.getDate()-(nowR.getDay()||7)+1);
+  const dimR=new Date(lunR);dimR.setDate(lunR.getDate()+6);
+  const rSem=await gas('get_semaine',{debut:iso(lunR),fin:iso(dimR)});
+  ttcgStates={};
+  if(rSem.success){(rSem.tt_dates||[]).forEach(d=>{ttcgStates[d]='tt';});(rSem.conge_dates||[]).forEach(d=>{ttcgStates[d]='cg';});}
   ttcgRender();
   const r=await gas('get_config');
   if(r.success&&r.config){document.getElementById('cfg-h').value=r.config.horizon||7;document.getElementById('cfg-tt').value=r.config.tt_declare||'';}
