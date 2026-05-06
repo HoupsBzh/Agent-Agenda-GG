@@ -300,6 +300,68 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .ptr-name{font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:.22em;color:var(--cu);opacity:0;transition:opacity .3s ease .2s}
 .ptr-zone.ptr-on .ptr-name{opacity:1;animation:ptrPulse 1.4s ease-in-out .2s infinite}
 @keyframes ptrPulse{0%,100%{opacity:.35}50%{opacity:1}}
+
+/* ── Bandeaux contexte TT / Congé / Férié ── */
+.ctx-banner{padding:7px 16px;display:flex;align-items:center;gap:9px;font-size:11px;font-weight:500;border-bottom:1px solid}
+.ctx-banner.tt{background:rgba(140,120,100,.1);border-color:rgba(140,120,100,.2);color:#a09080}
+.ctx-banner.cg{background:rgba(196,160,60,.1);border-color:rgba(196,160,60,.2);color:#c4a040}
+.ctx-banner.fe{background:rgba(196,160,60,.1);border-color:rgba(196,160,60,.2);color:#c4a040}
+.ctx-banner .cb-sub{font-size:10px;opacity:.7;margin-left:auto;font-weight:400}
+/* ── Pill emoji (remplace dpdot) ── */
+.dpill .dpico{font-size:9px;line-height:1;margin-top:3px;min-height:12px}
+
+/* ── TT/Congé réglages ── */
+.ttcg-week-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 6px}
+.ttcg-arrow{background:none;border:1px solid var(--border);color:var(--muted2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ttcg-lbl{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--text2);text-align:center}
+.ttcg-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 10px 8px}
+.ttcg-day{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;border-radius:7px;cursor:pointer;transition:all .15s;border:1px solid transparent;user-select:none}
+.ttcg-day:active{transform:scale(.92)}
+.ttcg-dn{font-size:7.5px;font-weight:600;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.ttcg-num{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text2);line-height:1}
+.ttcg-ico{font-size:9px;min-height:11px;line-height:1;margin-top:1px}
+.ttcg-day.past{opacity:.28;pointer-events:none}
+.ttcg-day.today{border-color:var(--border2)}
+.ttcg-day.today .ttcg-num{color:var(--text)}
+.ttcg-day.tt{background:rgba(140,120,100,.14);border-color:rgba(140,120,100,.3)}
+.ttcg-day.tt .ttcg-dn,.ttcg-day.tt .ttcg-num{color:#a09080}
+.ttcg-day.cg{background:rgba(196,160,60,.12);border-color:rgba(196,160,60,.3)}
+.ttcg-day.cg .ttcg-dn,.ttcg-day.cg .ttcg-num{color:#c4a040}
+.ttcg-leg{display:flex;gap:14px;padding:2px 14px 8px;font-size:10px;color:var(--muted)}
+.ttcg-leg span{display:flex;align-items:center;gap:5px}
+.ttcg-sw{width:8px;height:8px;border-radius:2px}
+.ttcg-ctx{position:absolute;background:var(--card);border:1px solid var(--border2);border-radius:9px;padding:5px;box-shadow:0 8px 28px rgba(0,0,0,.7);z-index:200;display:none;min-width:148px}
+.ttcg-ctx.open{display:block}
+.ttcg-ci{padding:8px 11px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .12s;color:var(--text2)}
+.ttcg-ci:hover{background:var(--border)}
+.ttcg-ci.ctt{color:#a09080}
+.ttcg-ci.ccg{color:#c4a040}
+.ttcg-ci.cdl{color:var(--muted)}
+.ttcg-toggle{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;font-size:12px;color:var(--muted);transition:color .15s;border-top:1px solid var(--border)}
+.ttcg-toggle:hover{color:var(--cu)}
+.ttcg-toggle-ico{font-size:16px;transition:transform .2s;display:inline-block}
+.ttcg-toggle-ico.open{transform:rotate(45deg)}
+.ttcg-form{padding:12px 14px;display:none;border-top:1px solid var(--border)}
+.ttcg-form.open{display:block}
+.ttcg-types{display:flex;gap:6px;margin-bottom:10px}
+.ttcg-tbtn{flex:1;padding:8px;border-radius:7px;border:1px solid var(--border);background:var(--hbg);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center}
+.ttcg-tbtn.sel-tt{background:rgba(140,120,100,.14);border-color:rgba(140,120,100,.3);color:#a09080}
+.ttcg-tbtn.sel-cg{background:rgba(196,160,60,.12);border-color:rgba(196,160,60,.3);color:#c4a040}
+.ttcg-dates{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.ttcg-pl{display:none;border-top:1px solid var(--border)}
+.ttcg-pl.has{display:block}
+.ttcg-plinner{padding:8px 14px;display:flex;flex-direction:column;gap:6px}
+.ttcg-pi{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;border-left:3px solid}
+.ttcg-pi.tt{background:rgba(140,120,100,.1);border-left-color:#a09080}
+.ttcg-pi.cg{background:rgba(196,160,60,.08);border-left-color:#c4a040}
+.ttcg-pi-ico{font-size:14px;flex-shrink:0}
+.ttcg-pi-info{flex:1;min-width:0}
+.ttcg-pi-type{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1px}
+.ttcg-pi.tt .ttcg-pi-type{color:#a09080}
+.ttcg-pi.cg .ttcg-pi-type{color:#c4a040}
+.ttcg-pi-dates{font-size:12px;color:var(--text2)}
+.ttcg-pi-del{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px;transition:color .15s}
+.ttcg-pi-del:hover{color:var(--err)}
 </style>
 </head>
 <body>
@@ -336,6 +398,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     </div>
     <div class="hr"><div class="hday" id="d-day">—</div><div class="hdate" id="d-date">—</div></div>
   </div>
+  <div id="dash-ctx-banner"></div>
   <div class="run-card">
     <div><div class="ril">Planificateur</div><div class="rill">Dernier run · <span id="last-run">—</span></div></div>
     <button class="rbtn" id="rbtn" onclick="forcerRun()"><span id="rtxt">Lancer</span></button>
@@ -415,14 +478,55 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
         <span class="flbl" style="margin:0">Horizon (jours)</span>
         <input id="cfg-h" type="number" class="fi" min="3" max="14" style="width:76px">
       </div>
-      <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;cursor:default">
-        <span class="flbl" style="margin:0">Jours TT déclarés</span>
-        <input id="cfg-tt" type="text" class="fi" placeholder="2026-05-05,2026-05-06">
-      </div>
       <div class="sr" style="cursor:default;gap:8px;flex-wrap:wrap">
         <button class="btn bcu bsm" onclick="saveCfg()">Sauvegarder</button>
         <button class="btn bgh bsm" onclick="testGas()">Tester GAS</button>
       </div>
+    </div>
+  </div>
+  <!-- TT & Congés -->
+  <div class="sgrp" style="margin-top:18px;position:relative">
+    <div class="sgt">Télétravail & Congés</div>
+    <div class="ttcg-week-nav">
+      <button class="ttcg-arrow" onclick="ttcgNav(-1)">‹</button>
+      <div class="ttcg-lbl" id="ttcg-lbl">—</div>
+      <button class="ttcg-arrow" onclick="ttcgNav(1)">›</button>
+    </div>
+    <div class="ttcg-grid" id="ttcg-grid"></div>
+    <div class="ttcg-leg">
+      <span><div class="ttcg-sw" style="background:rgba(140,120,100,.3)"></div>Télétravail</span>
+      <span><div class="ttcg-sw" style="background:rgba(196,160,60,.3)"></div>Congé</span>
+      <span style="margin-left:auto;font-size:9px;font-style:italic">Tape un jour</span>
+    </div>
+    <div class="ttcg-toggle" onclick="ttcgToggleForm()">
+      <span class="ttcg-toggle-ico" id="ttcg-tico">+</span>
+      <span id="ttcg-tlbl">Ajouter une période</span>
+    </div>
+    <div class="ttcg-form" id="ttcg-form">
+      <div class="ttcg-types">
+        <button class="ttcg-tbtn sel-tt" id="ttcg-btt" onclick="ttcgSelType('tt')">🏠 Télétravail</button>
+        <button class="ttcg-tbtn" id="ttcg-bcg" onclick="ttcgSelType('cg')">🌴 Congé</button>
+      </div>
+      <div class="ttcg-dates">
+        <div><span class="flbl">Du</span><input type="date" class="fi" id="ttcg-deb"></div>
+        <div><span class="flbl">Au</span><input type="date" class="fi" id="ttcg-fin"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn bcu" style="flex:1" onclick="ttcgAjouter()">Ajouter</button>
+        <button class="btn bgh" onclick="ttcgToggleForm()">Annuler</button>
+      </div>
+    </div>
+    <div class="ttcg-pl" id="ttcg-pl">
+      <div class="sgt" style="padding:10px 14px 4px">Périodes enregistrées</div>
+      <div class="ttcg-plinner" id="ttcg-pllist"></div>
+    </div>
+    <div style="padding:10px 14px 12px;border-top:1px solid var(--border)">
+      <button class="btn bcu bfl" onclick="ttcgSave()">Sauvegarder dans l'agenda</button>
+    </div>
+    <div class="ttcg-ctx" id="ttcg-ctx">
+      <div class="ttcg-ci ctt" onclick="ttcgSetDay('tt')">🏠 Télétravail</div>
+      <div class="ttcg-ci ccg" onclick="ttcgSetDay('cg')">🌴 Congé</div>
+      <div class="ttcg-ci cdl" onclick="ttcgSetDay('')">✕ Effacer</div>
     </div>
   </div>
   <div class="sgrp" style="margin-top:18px">
@@ -554,7 +658,7 @@ const gu=()=>localStorage.getItem('gas_url')||GAS_D;
 const GC={'0':'#8ba3bf','1':'#7986CB','2':'#33B679','3':'#8E24AA','4':'#E67C73','5':'#F6BF26','6':'#F4511E','7':'#039BE5','8':'#0B8043','9':'#718096','10':'#0B8043','11':'#D50000'};
 const JJ=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
 const MM=['jan.','fév.','mar.','avr.','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
-const S={bl:[],pr:[],sd:null,cs:'2',en:null,bm:null,statsData:null,statsWkIdx:0};
+const S={bl:[],pr:[],sd:null,cs:'2',en:null,bm:null,statsData:null,statsWkIdx:0,ttDates:[],cgDates:[],feDates:[],regPeriodes:[]};
 
 async function gas(a,x={}){try{const r=await fetch(gu(),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:a,...x})});return await r.json();}catch(e){return{success:false,error:e.message};}}
 
@@ -653,19 +757,28 @@ async function loadToday(){
   const tb=r.blocs.filter(b=>b.debut.slice(0,10)===t);
   document.getElementById('tcnt').textContent=tb.length?tb.length+' bloc'+(tb.length>1?'s':''):'';
   if(!tb.length){el.innerHTML=emp('✨','Journée libre','');ptrHide();return;}
+  // Bandeau contexte dashboard
+  const todayDs=t;
+  const dashBanner=document.getElementById('dash-ctx-banner');
+  if(dashBanner){
+    const isTT=S.ttDates.includes(todayDs);
+    const isCG=S.cgDates.includes(todayDs);
+    const isFE=S.feDates.includes(todayDs);
+    if(isFE) dashBanner.innerHTML='<div class="ctx-banner fe">🌴 <span>Jour Férié</span></div>';
+    else if(isCG) dashBanner.innerHTML='<div class="ctx-banner cg">🌴 <span>Congé</span><span class="cb-sub">Aujourd'hui</span></div>';
+    else if(isTT) dashBanner.innerHTML='<div class="ctx-banner tt">🏠 <span>Télétravail</span><span class="cb-sub">Aujourd'hui</span></div>';
+    else dashBanner.innerHTML='';
+  }
   el.innerHTML='';
   tb.forEach(function(b,i){
     // Conteneur externe fixe (comme .evc sur la page Semaine)
     const wrapper=document.createElement('div');
     wrapper.className='evc';
-    wrapper.style.overflowX='clip';
     // Hints derrière
     const okHint=document.createElement('div');
     okHint.className='sw-ok';
-    okHint.textContent='✅ Réalisé';
     const repHint=document.createElement('div');
     repHint.className='sw-rep';
-    repHint.textContent='⏭ Reporté';
     wrapper.appendChild(okHint);
     wrapper.appendChild(repHint);
     // Div interne qui translate (comme .evr)
@@ -742,12 +855,44 @@ async function loadSem(){
   document.getElementById('dview').innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
   const r=await gas('get_semaine',{debut:iso(days[0]),fin:iso(days[6])});
   if(r.success&&r.blocs)S.bl=r.blocs;
-  const bd={};(r.blocs||[]).forEach(b=>{const d=b.debut.slice(0,10);bd[d]=(bd[d]||0)+1;});
+  S.ttDates=r.tt_dates||[];
+  S.cgDates=r.conge_dates||[];
+  S.feDates=r.ferie_dates||[];
   days.forEach(d=>{
-    const ds=iso(d);const pill=document.createElement('div');
-    pill.className='dpill'+(ds===iso(now)?' tod':'')+(ds===S.sd?' sel':'')+(bd[ds]?' hev':'');
-    pill.innerHTML=`<span class="dpn">${JJ[d.getDay()]}</span><span class="dpnum">${d.getDate()}</span><span class="dpdot"></span>`;
-    pill.onclick=()=>{S.sd=ds;document.querySelectorAll('.dpill').forEach(p=>p.classList.remove('sel'));pill.classList.add('sel');renderDV(ds);setHdr('sd-day','sd-date',d);};
+    const ds=iso(d);
+    const isTT=S.ttDates.includes(ds);
+    const isCG=S.cgDates.includes(ds);
+    const isFE=S.feDates.includes(ds);
+    const pill=document.createElement('div');
+    const isSel=ds===S.sd;
+    pill.className='dpill'+(ds===iso(now)?' tod':'')+(isSel?' sel':'');
+    // Dot : copper si sélectionné, emoji si TT/Congé/Férié, vide sinon
+    let dotContent='<span class="dpdot"></span>';
+    if(!isSel&&(isTT||isCG||isFE)){
+      const ico=isTT?'🏠':'🌴';
+      dotContent=`<span class="dpico">${ico}</span>`;
+    } else if(isSel){
+      dotContent='<span class="dpdot" style="background:var(--cu)"></span>';
+    }
+    pill.innerHTML=`<span class="dpn">${JJ[d.getDay()]}</span><span class="dpnum">${d.getDate()}</span>${dotContent}`;
+    pill.onclick=()=>{
+      S.sd=ds;
+      document.querySelectorAll('.dpill').forEach(p=>{
+        const pds=iso(days[Array.from(pills.children).indexOf(p)]);
+        const pTT=S.ttDates.includes(pds);
+        const pCG=S.cgDates.includes(pds);
+        const pFE=S.feDates.includes(pds);
+        const pSel=pds===ds;
+        p.classList.toggle('sel',pSel);
+        const dotEl=p.querySelector('.dpdot,.dpico');
+        if(dotEl){
+          if(pSel){dotEl.className='dpdot';dotEl.style.background='var(--cu)';dotEl.textContent='';}
+          else if(pTT||pCG||pFE){dotEl.className='dpico';dotEl.style.background='';dotEl.textContent=pTT?'🏠':'🌴';}
+          else{dotEl.className='dpdot';dotEl.style.background='';dotEl.textContent='';}
+        }
+      });
+      renderDV(ds);setHdr('sd-day','sd-date',d);
+    };
     pills.appendChild(pill);
   });
   renderDV(S.sd);
@@ -795,11 +940,21 @@ function addSwipe(evr, key, titre, ds){
   });
 }
 
+function ctxBanner(ds){
+  const isTT=S.ttDates.includes(ds);
+  const isCG=S.cgDates.includes(ds);
+  const isFE=S.feDates.includes(ds);
+  if(isFE) return `<div class="ctx-banner fe">🌴 <span>Jour Férié</span></div>`;
+  if(isCG) return `<div class="ctx-banner cg">🌴 <span>Congé</span><span class="cb-sub">Blocs dès 12h</span></div>`;
+  if(isTT) return `<div class="ctx-banner tt">🏠 <span>Télétravail</span><span class="cb-sub">Blocs dès 17h15</span></div>`;
+  return '';
+}
+
 function renderDV(ds){
   const el=document.getElementById('dview');
   const bl=S.bl.filter(b=>b.debut.slice(0,10)===ds);
   const d=new Date(ds+'T12:00:00');
-  el.innerHTML=`<div class="dvlbl">${JJ[d.getDay()]} ${d.getDate()} ${MM[d.getMonth()]}</div>`;
+  el.innerHTML=ctxBanner(ds)+`<div class="dvlbl">${JJ[d.getDay()]} ${d.getDate()} ${MM[d.getMonth()]}</div>`;
   if(!bl.length){el.innerHTML+=emp('🌿','Journée libre','');return;}
   bl.forEach(b=>{
     const card=document.createElement('div');card.className='evc';
@@ -938,9 +1093,147 @@ async function marquer(st){
   } else toast('❌ Erreur',true);
 }
 
+
+// ── TT & Congés réglages ──
+var ttcgOffset=0;
+var ttcgStates={};
+var ttcgSelDay=null;
+var ttcgFormOpen=false;
+var ttcgType='tt';
+var ttcgPeriodes=[];
+
+function ttcgIso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function ttcgFmtD(s){const [y,m,d]=s.split('-');return d+' '+MM[parseInt(m)-1];}
+function ttcgFmtDL(s){const [y,m,d]=s.split('-');return d+' '+MM[parseInt(m)-1]+' '+y;}
+
+function ttcgGetMonday(off){
+  const today=new Date();
+  const day=today.getDay()||7;
+  const mon=new Date(today);
+  mon.setDate(today.getDate()-day+1+off*7);
+  return mon;
+}
+
+function ttcgRender(){
+  const mon=ttcgGetMonday(ttcgOffset);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const lbl=document.getElementById('ttcg-lbl');
+  if(lbl) lbl.textContent=ttcgFmtD(ttcgIso(mon))+' – '+ttcgFmtD(ttcgIso(sun));
+  const grid=document.getElementById('ttcg-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  const todayStr=ttcgIso(new Date());
+  for(let i=0;i<7;i++){
+    const d=new Date(mon);d.setDate(mon.getDate()+i);
+    const ds=ttcgIso(d);
+    const st=ttcgStates[ds]||'';
+    const past=d<new Date(new Date().setHours(0,0,0,0));
+    const isToday=ds===todayStr;
+    const el=document.createElement('div');
+    el.className='ttcg-day'+(st?' '+st:'')+(isToday?' today':'')+(past?' past':'');
+    const ico=st==='tt'?'🏠':st==='cg'?'🌴':'';
+    el.innerHTML=`<span class="ttcg-dn">${JJ[d.getDay()]}</span><span class="ttcg-num">${d.getDate()}</span><span class="ttcg-ico">${ico}</span>`;
+    if(!past){
+      el.onclick=(e)=>{e.stopPropagation();ttcgSelDay=ds;ttcgShowCtx(e,el);};
+    }
+    grid.appendChild(el);
+  }
+}
+
+function ttcgNav(d){ttcgOffset+=d;ttcgRender();}
+
+function ttcgShowCtx(e,el){
+  const ctx=document.getElementById('ttcg-ctx');
+  const wrap=el.closest('.sgrp');
+  const wr=wrap.getBoundingClientRect();
+  const er=el.getBoundingClientRect();
+  ctx.style.top=(er.bottom-wr.top+4)+'px';
+  ctx.style.left=Math.min(Math.max(0,er.left-wr.left-10),wr.width-160)+'px';
+  ctx.classList.add('open');
+  setTimeout(()=>document.addEventListener('click',ttcgCloseCtx,{once:true}),10);
+}
+function ttcgCloseCtx(){const c=document.getElementById('ttcg-ctx');if(c)c.classList.remove('open');}
+function ttcgSetDay(t){
+  if(ttcgSelDay){if(t)ttcgStates[ttcgSelDay]=t;else delete ttcgStates[ttcgSelDay];}
+  ttcgCloseCtx();ttcgRender();
+}
+
+function ttcgToggleForm(){
+  ttcgFormOpen=!ttcgFormOpen;
+  const f=document.getElementById('ttcg-form');
+  const ico=document.getElementById('ttcg-tico');
+  const lbl=document.getElementById('ttcg-tlbl');
+  if(f){f.classList.toggle('open',ttcgFormOpen);}
+  if(ico){ico.classList.toggle('open',ttcgFormOpen);}
+  if(lbl){lbl.textContent=ttcgFormOpen?'Annuler':'Ajouter une période';}
+  // Init dates
+  if(ttcgFormOpen){
+    const today=ttcgIso(new Date());
+    const df=document.getElementById('ttcg-deb');
+    const dt=document.getElementById('ttcg-fin');
+    if(df&&!df.value)df.value=today;
+    if(dt&&!dt.value)dt.value=today;
+  }
+}
+
+function ttcgSelType(t){
+  ttcgType=t;
+  const btt=document.getElementById('ttcg-btt');
+  const bcg=document.getElementById('ttcg-bcg');
+  if(btt)btt.className='ttcg-tbtn'+(t==='tt'?' sel-tt':'');
+  if(bcg)bcg.className='ttcg-tbtn'+(t==='cg'?' sel-cg':'');
+}
+
+function ttcgAjouter(){
+  const deb=document.getElementById('ttcg-deb')?.value;
+  const fin=document.getElementById('ttcg-fin')?.value;
+  if(!deb)return;
+  const finVal=fin&&fin>=deb?fin:deb;
+  ttcgPeriodes.push({type:ttcgType,debut:deb,fin:finVal});
+  ttcgRenderPeriodes();
+  ttcgToggleForm();
+}
+
+function ttcgRenderPeriodes(){
+  const pl=document.getElementById('ttcg-pl');
+  const list=document.getElementById('ttcg-pllist');
+  if(!pl||!list)return;
+  if(!ttcgPeriodes.length){pl.classList.remove('has');list.innerHTML='';return;}
+  pl.classList.add('has');
+  list.innerHTML='';
+  ttcgPeriodes.forEach((p,i)=>{
+    const ico=p.type==='tt'?'🏠':'🌴';
+    const typeLabel=p.type==='tt'?'Télétravail':'Congé';
+    const dates=p.debut===p.fin?ttcgFmtDL(p.debut):ttcgFmtDL(p.debut)+' → '+ttcgFmtDL(p.fin);
+    const el=document.createElement('div');
+    el.className='ttcg-pi '+p.type;
+    el.innerHTML=`<span class="ttcg-pi-ico">${ico}</span><div class="ttcg-pi-info"><div class="ttcg-pi-type">${typeLabel}</div><div class="ttcg-pi-dates">${dates}</div></div><button class="ttcg-pi-del" onclick="ttcgDelPeriode(${i})">×</button>`;
+    list.appendChild(el);
+  });
+}
+
+function ttcgDelPeriode(i){ttcgPeriodes.splice(i,1);ttcgRenderPeriodes();}
+
+async function ttcgSave(){
+  const entrees=[];
+  // Jours individuels de la grille
+  Object.keys(ttcgStates).forEach(ds=>{
+    entrees.push({debut:ds,fin:ds,type:ttcgStates[ds]});
+  });
+  // Périodes du formulaire
+  ttcgPeriodes.forEach(p=>{
+    entrees.push({debut:p.debut,fin:p.fin,type:p.type});
+  });
+  if(!entrees.length){toast('Rien à sauvegarder');return;}
+  const r=await gas('save_tt_conge',{entrees});
+  if(r.success){toast('✅ '+r.created+' entrée(s) ajoutée(s) dans l'agenda');}
+  else toast('❌ '+(r.error||'Erreur'),true);
+}
+
 // ── Réglages ──
 async function loadReg(){
   document.getElementById('cfg-url').value=gu();
+  ttcgRender();
   const r=await gas('get_config');
   if(r.success&&r.config){document.getElementById('cfg-h').value=r.config.horizon||7;document.getElementById('cfg-tt').value=r.config.tt_declare||'';}
   ptrHide();
