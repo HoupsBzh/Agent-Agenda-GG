@@ -285,8 +285,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 @keyframes spIn{from{opacity:0;transform:scale(.88) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
 /* ── Pull-to-refresh ── */
-.ptr-zone{position:absolute;top:0;left:0;right:0;height:0;overflow:hidden;transition:height .32s cubic-bezier(.34,1.2,.64,1);z-index:10;background:var(--bg);display:flex;align-items:flex-end;justify-content:center;padding-bottom:0}
-.ptr-zone.ptr-on{height:82px;padding-bottom:10px}
+.ptr-zone{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:50;background:transparent}.ptr-zone.ptr-on{height:82px;padding-bottom:10px}
+.ptr-zone.ptr-on{opacity:1}
 .ptr-inner{display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease}
 .ptr-zone.ptr-on .ptr-inner{opacity:1;transform:translateY(0)}
 .ptr-needle-h{transform-origin:45px 45px}
