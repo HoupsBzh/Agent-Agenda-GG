@@ -1217,19 +1217,21 @@ function ttcgRenderPeriodes(){
 function ttcgDelPeriode(i){ttcgPeriodes.splice(i,1);ttcgRenderPeriodes();}
 
 async function ttcgSave(){
+  const mon=ttcgGetMonday(ttcgOffset);
+  const dim=new Date(mon);dim.setDate(mon.getDate()+6);
+  const clearDebut=ttcgIso(mon);
+  const clearFin=ttcgIso(dim);
   const entrees=[];
-  // Jours individuels de la grille
   Object.keys(ttcgStates).forEach(ds=>{
-    entrees.push({debut:ds,fin:ds,type:ttcgStates[ds]});
+    const t=ttcgStates[ds];
+    entrees.push({debut:ds,fin:ds,type:t==='cg'?'conge':'tt'});
   });
-  // Périodes du formulaire
   ttcgPeriodes.forEach(p=>{
-    entrees.push({debut:p.debut,fin:p.fin,type:p.type});
+    entrees.push({debut:p.debut,fin:p.fin,type:p.type==='cg'?'conge':'tt'});
   });
-  if(!entrees.length){toast('Rien à sauvegarder');return;}
-  const r=await gas('save_tt_conge',{entrees});
-  if(r.success){toast('✅ '+r.created+' entrée(s) ajoutée(s) dans l'agenda');}
-  else toast('❌ '+(r.error||'Erreur'),true);
+  const r=await gas('save_tt_conge',{entrees,clear_debut:clearDebut,clear_fin:clearFin});
+  if(r.success){toast('\u2705 Agenda mis \u00e0 jour ('+r.created+' \u00e9v\u00e9nement(s))');}
+  else toast('\u274c '+(r.error||'Erreur'),true);
 }
 
 // ── Réglages ──
