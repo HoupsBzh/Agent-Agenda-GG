@@ -659,11 +659,14 @@ async function loadToday(){
     // Conteneur externe fixe (comme .evc sur la page Semaine)
     const wrapper=document.createElement('div');
     wrapper.className='evc';
+    wrapper.style.overflowX='clip';
     // Hints derrière
     const okHint=document.createElement('div');
     okHint.className='sw-ok';
+    okHint.textContent='✅ Réalisé';
     const repHint=document.createElement('div');
     repHint.className='sw-rep';
+    repHint.textContent='⏭ Reporté';
     wrapper.appendChild(okHint);
     wrapper.appendChild(repHint);
     // Div interne qui translate (comme .evr)
