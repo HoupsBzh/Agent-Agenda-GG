@@ -1226,7 +1226,7 @@ async function ttcgSave(){
   });
   if(!entrees.length){toast('Rien à sauvegarder');return;}
   const r=await gas('save_tt_conge',{entrees});
-  if(r.success){toast('✅ '+r.created+' entrée(s) ajoutée(s) dans l'agenda');}
+  if(r.success){toast('✅ '+r.created+' entr\u00e9e(s) ajout\u00e9e(s) dans l\u2019agenda');}
   else toast('❌ '+(r.error||'Erreur'),true);
 }
 
