@@ -210,6 +210,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .reg-link button{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;padding:7px 16px;letter-spacing:.05em;display:flex;align-items:center;gap:5px;border-radius:var(--rs);transition:color .15s}
 .reg-link button:active{color:var(--text2)}
 
+
+/* ── Stats drill-down ── */
+.score-card{cursor:pointer;transition:background .15s}
+.score-card:active{background:var(--card2)}
+.drill-list{padding:0 16px;margin-bottom:14px;display:none}
+.drill-list.open{display:block}
+.drill-item{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:7px;background:var(--hbg);border:1px solid var(--border);margin-bottom:5px}
+.drill-ico{font-size:14px;flex-shrink:0}
+.drill-name{flex:1;font-size:12px;color:var(--text)}
+.drill-time{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.drill-st{font-size:12px;flex-shrink:0}
 /* ── Stats — sélecteur semaine ── */
 .wk-sel{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;gap:8px}
 .wk-arrow{background:none;border:1px solid var(--border);color:var(--muted2);width:32px;height:32px;border-radius:var(--rs);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
@@ -678,11 +689,16 @@ function goTo(n,btn){
   const now=new Date();
   const m={dash:['d-day','d-date'],semaine:['sd-day','sd-date'],projets:['pd-day','pd-date'],stats:['std-day','std-date'],reglages:['rd-day','rd-date']};
   if(m[n])setHdr(m[n][0],m[n][1],now);
-  if(n==='semaine')loadSem();
-  if(n==='dash')loadToday();
-  if(n==='projets'&&S.pr.length===0)loadPr();
-  if(n==='reglages')loadReg();
-  if(n==='stats')loadStats();
+  // Loader KERN sur changement d'onglet (sauf projets qui a son propre cache)
+  if(n!=='projets'||S.pr.length===0) ptrShow();
+  document.getElementById('nav').style.pointerEvents='none';
+  const done=()=>{ptrHide();document.getElementById('nav').style.pointerEvents='';};
+  if(n==='semaine'){loadSem().finally(done);}
+  else if(n==='dash'){loadToday().finally(done);}
+  else if(n==='projets'){if(S.pr.length===0)loadPr().finally(done);else done();}
+  else if(n==='reglages'){loadReg().finally(done);}
+  else if(n==='stats'){loadStats().finally(done);}
+  else done();
 }
 
 function openReglages(){
@@ -1099,6 +1115,7 @@ async function marquer(st){
 // ── TT & Congés réglages ──
 var ttcgOffset=0;
 var ttcgStates={};
+var ttcgFeDates=[];
 var ttcgSelDay=null;
 var ttcgFormOpen=false;
 var ttcgType='tt';
@@ -1129,20 +1146,33 @@ function ttcgRender(){
     const d=new Date(mon);d.setDate(mon.getDate()+i);
     const ds=ttcgIso(d);
     const st=ttcgStates[ds]||'';
+    const isFe=ttcgFeDates.includes(ds);
     const past=d<new Date(new Date().setHours(0,0,0,0));
     const isToday=ds===todayStr;
     const el=document.createElement('div');
-    el.className='ttcg-day'+(st?' '+st:'')+(isToday?' today':'')+(past?' past':'');
-    const ico=st==='tt'?'🏠':st==='cg'?'🌴':'';
+    el.className='ttcg-day'+(st?' '+st:isFe?' cg':'')+(isToday?' today':'')+(past?' past':'')+(isFe?' ferie':'');
+    const ico=st==='tt'?'🏠':(st==='cg'||isFe)?'🌴':'';
     el.innerHTML=`<span class="ttcg-dn">${JJ[d.getDay()]}</span><span class="ttcg-num">${d.getDate()}</span><span class="ttcg-ico">${ico}</span>`;
-    if(!past){
+    if(!past&&!isFe){
       el.onclick=(e)=>{e.stopPropagation();ttcgSelDay=ds;ttcgShowCtx(e,el);};
     }
     grid.appendChild(el);
   }
 }
 
-function ttcgNav(d){ttcgOffset+=d;ttcgRender();}
+async function ttcgNav(d){
+  ttcgOffset+=d;
+  const mon=ttcgGetMonday(ttcgOffset);
+  const dim=new Date(mon);dim.setDate(mon.getDate()+6);
+  const r=await gas('get_semaine',{debut:ttcgIso(mon),fin:ttcgIso(dim)});
+  ttcgStates={};
+  if(r.success){
+    (r.tt_dates||[]).forEach(d=>{ttcgStates[d]='tt';});
+    (r.conge_dates||[]).forEach(d=>{ttcgStates[d]='cg';});
+    ttcgFeDates=r.ferie_dates||[];
+  }
+  ttcgRender();
+}
 
 function ttcgShowCtx(e,el){
   const ctx=document.getElementById('ttcg-ctx');
@@ -1242,7 +1272,7 @@ async function loadReg(){
   const dimR=new Date(lunR);dimR.setDate(lunR.getDate()+6);
   const rSem=await gas('get_semaine',{debut:iso(lunR),fin:iso(dimR)});
   ttcgStates={};
-  if(rSem.success){(rSem.tt_dates||[]).forEach(d=>{ttcgStates[d]='tt';});(rSem.conge_dates||[]).forEach(d=>{ttcgStates[d]='cg';});}
+  if(rSem.success){(rSem.tt_dates||[]).forEach(d=>{ttcgStates[d]='tt';});(rSem.conge_dates||[]).forEach(d=>{ttcgStates[d]='cg';});ttcgFeDates=rSem.ferie_dates||[];}
   ttcgRender();
   const r=await gas('get_config');
   if(r.success&&r.config){document.getElementById('cfg-h').value=r.config.horizon||7;document.getElementById('cfg-tt').value=r.config.tt_declare||'';}
@@ -1399,10 +1429,13 @@ function renderStats(){
 
   // Projets de cette semaine
   const parProjet=d.par_projet||{};
+  const EXCLURE_STATS=['loyer','etf','pea','investissement'];
   const labels=Object.keys(parProjet).filter(l=>{
   const h=parProjet[l]||[];
   const w=h[idx]||{planifies:0};
   if(w.planifies===0) return false;
+  const ln=l.toLowerCase();
+  if(EXCLURE_STATS.some(k=>ln.includes(k))) return false;
   const p=S.pr.find(x=>l.includes(x.nom)||x.nom.includes(l));
   if(p&&(p.mode||'').toLowerCase()==='one-shot') return false;
   return true;
@@ -1414,7 +1447,7 @@ const routLabels=labels.filter(l=>isRoutine(l));
   let html='';
 
   // Score card
-  html+=`<div class="score-card">
+  html+=`<div class="score-card" onclick="toggleDrill()">
     <div class="score-ring">
       <svg width="74" height="74" viewBox="0 0 74 74">
         <circle cx="37" cy="37" r="30" fill="none" stroke="var(--border2)" stroke-width="7"/>
@@ -1432,6 +1465,19 @@ const routLabels=labels.filter(l=>isRoutine(l));
       </div>
     </div>
   </div>`;
+
+  // Drill-down blocs réalisés/reportés
+  const drillBlocs=(S.bl||[]).filter(b=>{
+    if(!b.statut) return false;
+    const bwk=cleSemaineJS(new Date(b.debut+'T12:00:00'));
+    return bwk===sem.num;
+  });
+  const drillHtml=drillBlocs.length?drillBlocs.map(b=>{
+    const ico=b.statut==='Réalisé'?'✅':'⏭';
+    const t=b.debut?b.debut.slice(11,16):'';
+    return `<div class="drill-item"><span class="drill-ico">${ico}</span><span class="drill-name">${es(b.titre)}</span><span class="drill-time">${t}</span></div>`;
+  }).join(''):('<div style="padding:8px 11px;font-size:12px;color:var(--muted);font-style:italic">Aucun bloc marqué cette semaine</div>');
+  html+=`<div class="drill-list" id="drill-list">${drillHtml}</div>`;
 
   // Projets
   if(labels.length){
@@ -1475,6 +1521,11 @@ const routLabels=labels.filter(l=>isRoutine(l));
   const color=getColorForLabel(label);
   buildSpark('spk-'+pid,hist,color,idx);
 });
+}
+
+function toggleDrill(){
+  const el=document.getElementById('drill-list');
+  if(el) el.classList.toggle('open');
 }
 
 function toggleStp(id){
