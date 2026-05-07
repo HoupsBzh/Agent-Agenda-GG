@@ -211,6 +211,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .reg-link button:active{color:var(--text2)}
 
 
+/* ── Navigation semaines (vue Semaine) ── */
+.sem-nav{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 2px}
+.sem-nav-arrow{background:none;border:1px solid var(--border);color:var(--muted2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.sem-nav-arrow:disabled{opacity:.25;pointer-events:none}
+.sem-nav-arrow:active{background:var(--card)}
+.sem-nav-lbl{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:var(--muted);text-align:center}
+.sem-nav-lbl.past{color:var(--cu);opacity:.7}
+
 /* ── Stats drill-down ── */
 .score-card{cursor:pointer;transition:background .15s}
 .score-card:active{background:var(--card2)}
@@ -432,6 +440,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <div class="hr"><div class="hday" id="sd-day">—</div><div class="hdate" id="sd-date">—</div></div>
   </div>
   <div class="wpills" id="wpills"></div>
+  <div class="sem-nav" id="sem-nav" style="display:none">
+    <button class="sem-nav-arrow" id="sem-prev" onclick="semNav(-1)">‹</button>
+    <div class="sem-nav-lbl past" id="sem-nav-lbl"></div>
+    <button class="sem-nav-arrow" id="sem-next" onclick="semNav(1)">›</button>
+  </div>
   <div class="dview" id="dview"><div class="ldf"><div class="spin"></div><span>Chargement…</span></div></div>
 </div>
 
@@ -837,6 +850,14 @@ async function forcerRun(){
 }
 
 // ── Semaine ──
+var semOffset=0;
+const SEM_MIN=-4; // max 4 semaines en arrière
+
+function semNav(dir){
+  semOffset=Math.max(SEM_MIN,Math.min(0,semOffset+dir));
+  loadSem();
+}
+
 function initPTR(){
   const screen=document.getElementById('s-semaine');
   const zone=document.getElementById('ptr-zone');
@@ -867,8 +888,23 @@ function initPTR(){
 }
 
 async function loadSem(){
-  const now=new Date();S.sd=iso(now);
+  const base=new Date();
+  base.setDate(base.getDate()+semOffset*7);
+  const now=base;
+  const today=iso(new Date()); // vrai aujourd'hui pour le marqueur .tod
+  S.sd=iso(now);
   const pills=document.getElementById('wpills');pills.innerHTML='';
+  // Nav semaines passées
+  const nav=document.getElementById('sem-nav');
+  const navLbl=document.getElementById('sem-nav-lbl');
+  const prevBtn=document.getElementById('sem-prev');
+  const nextBtn=document.getElementById('sem-next');
+  if(nav){
+    nav.style.display=semOffset!==0?'flex':'none';
+    if(navLbl)navLbl.textContent=semOffset===0?'':('Semaine passée'+(semOffset<-1?' ('+Math.abs(semOffset)+')':''));
+    if(prevBtn)prevBtn.disabled=semOffset<=SEM_MIN;
+    if(nextBtn)nextBtn.disabled=semOffset>=0;
+  }
   const days=[];for(let i=0;i<7;i++){const d=new Date(now);d.setDate(now.getDate()+i);days.push(d);}
   document.getElementById('dview').innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
   const r=await gas('get_semaine',{debut:iso(days[0]),fin:iso(days[6])});
@@ -883,7 +919,7 @@ async function loadSem(){
     const isFE=S.feDates.includes(ds);
     const pill=document.createElement('div');
     const isSel=ds===S.sd;
-    pill.className='dpill'+(ds===iso(now)?' tod':'')+(isSel?' sel':'');
+    pill.className='dpill'+(ds===today?' tod':'')+(isSel?' sel':'');
     // Dot : copper si sélectionné, emoji si TT/Congé/Férié, vide sinon
     let dotContent='<span class="dpdot"></span>';
     if(!isSel&&(isTT||isCG||isFE)){
@@ -1008,7 +1044,7 @@ async function loadPr(){
   el.innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
   const r=await gas('get_projets');
   if(!r.success||!r.projets){el.innerHTML=emp('⚠️','Erreur','');ptrHide();return;}
-  S.pr=[...r.projets].sort((a,b)=>{const at=(a.statut||'').toLowerCase().includes('termin');const bt=(b.statut||'').toLowerCase().includes('termin');if(at!==bt)return at?1:-1;return(parseInt(a.priorite)||99)-(parseInt(b.priorite)||99);});
+  S.pr=[...r.projets].sort((a,b)=>{const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');const at=norm(a.statut).startsWith('termin');const bt=norm(b.statut).startsWith('termin');if(at!==bt)return at?1:-1;return(parseInt(a.priorite)||99)-(parseInt(b.priorite)||99);});
   renderPr();
   ptrHide();
 }
@@ -1523,9 +1559,27 @@ const routLabels=labels.filter(l=>isRoutine(l));
 });
 }
 
-function toggleDrill(){
+async function toggleDrill(){
   const el=document.getElementById('drill-list');
-  if(el) el.classList.toggle('open');
+  if(!el)return;
+  if(el.classList.contains('open')){el.classList.remove('open');return;}
+  el.innerHTML='<div style="padding:10px;text-align:center"><div class="spin" style="margin:0 auto;width:16px;height:16px"></div></div>';
+  el.classList.add('open');
+  const sem=S.statsData&&S.statsData.semaines?S.statsData.semaines[S.statsWkIdx]:null;
+  if(!sem){el.innerHTML='<div style="padding:8px 11px;font-size:12px;color:var(--muted);font-style:italic">Aucune donn\u00e9e</div>';return;}
+  const lun=sem.num;
+  const dim=new Date(lun+'T12:00:00');dim.setDate(dim.getDate()+6);
+  const r=await gas('get_semaine',{debut:lun,fin:iso(dim)});
+  const blocs=(r.blocs||[]).filter(b=>b.statut);
+  if(!blocs.length){
+    el.innerHTML='<div style="padding:8px 11px;font-size:12px;color:var(--muted);font-style:italic">Aucun bloc marqu\u00e9 cette semaine</div>';
+  } else {
+    el.innerHTML=blocs.map(b=>{
+      const ico=b.statut==='\u0052\u00e9alis\u00e9'?'\u2705':'\u23ed';
+      const t=b.debut?b.debut.slice(11,16):'';
+      return `<div class="drill-item"><span class="drill-ico">${ico}</span><span class="drill-name">${es(b.titre)}</span><span class="drill-time">${t}</span></div>`;
+    }).join('');
+  }
 }
 
 function toggleStp(id){
