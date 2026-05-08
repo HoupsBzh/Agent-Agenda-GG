@@ -902,7 +902,7 @@ async function loadSem(){
   if(prevBtn)prevBtn.disabled=semOffset<=SEM_MIN;
   if(nextBtn)nextBtn.disabled=semOffset>=0;
   const days=[];for(let i=0;i<7;i++){const d=new Date(now);d.setDate(now.getDate()+i);days.push(d);}
-  document.getElementById('dview').innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
+  document.getElementById('dview').innerHTML='';
   const r=await gas('get_semaine',{debut:iso(days[0]),fin:iso(days[6])});
   if(r.success&&r.blocs)S.bl=r.blocs;
   S.ttDates=r.tt_dates||[];
