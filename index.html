@@ -92,6 +92,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .ettl{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--text2)}
 .esub{font-size:12px;color:var(--muted)}
 
+.pills-nav-row{display:flex;align-items:center;gap:4px;padding:6px 10px}
+.pills-nav-row .wpills{padding:6px 0;flex:1;overflow-x:auto;scrollbar-width:none}
+.pills-nav-row .wpills::-webkit-scrollbar{display:none}
 .wpills{display:flex;gap:6px;padding:14px 16px;overflow-x:auto;scrollbar-width:none}
 .wpills::-webkit-scrollbar{display:none}
 .dpill{flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:9px 10px 8px;border-radius:9px;background:var(--card);border:1px solid var(--border);cursor:pointer;transition:all .18s;min-width:46px}
@@ -439,10 +442,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     <div class="hl"><div class="htitle"><div class="hbar"></div><h1>KERN</h1></div><div class="hsub">Vue semaine</div></div>
     <div class="hr"><div class="hday" id="sd-day">—</div><div class="hdate" id="sd-date">—</div></div>
   </div>
-  <div class="wpills" id="wpills"></div>
-  <div class="sem-nav" id="sem-nav" style="display:none">
+  <div class="pills-nav-row">
     <button class="sem-nav-arrow" id="sem-prev" onclick="semNav(-1)">‹</button>
-    <div class="sem-nav-lbl past" id="sem-nav-lbl"></div>
+    <div class="wpills" id="wpills"></div>
     <button class="sem-nav-arrow" id="sem-next" onclick="semNav(1)">›</button>
   </div>
   <div class="dview" id="dview"><div class="ldf"><div class="spin"></div><span>Chargement…</span></div></div>
@@ -895,16 +897,10 @@ async function loadSem(){
   S.sd=iso(now);
   const pills=document.getElementById('wpills');pills.innerHTML='';
   // Nav semaines passées
-  const nav=document.getElementById('sem-nav');
-  const navLbl=document.getElementById('sem-nav-lbl');
   const prevBtn=document.getElementById('sem-prev');
   const nextBtn=document.getElementById('sem-next');
-  if(nav){
-    nav.style.display=semOffset!==0?'flex':'none';
-    if(navLbl)navLbl.textContent=semOffset===0?'':('Semaine passée'+(semOffset<-1?' ('+Math.abs(semOffset)+')':''));
-    if(prevBtn)prevBtn.disabled=semOffset<=SEM_MIN;
-    if(nextBtn)nextBtn.disabled=semOffset>=0;
-  }
+  if(prevBtn)prevBtn.disabled=semOffset<=SEM_MIN;
+  if(nextBtn)nextBtn.disabled=semOffset>=0;
   const days=[];for(let i=0;i<7;i++){const d=new Date(now);d.setDate(now.getDate()+i);days.push(d);}
   document.getElementById('dview').innerHTML='<div class="ldf"><div class="spin"></div><span>Chargement…</span></div>';
   const r=await gas('get_semaine',{debut:iso(days[0]),fin:iso(days[6])});
@@ -1502,18 +1498,10 @@ const routLabels=labels.filter(l=>isRoutine(l));
     </div>
   </div>`;
 
-  // Drill-down blocs réalisés/reportés
-  const drillBlocs=(S.bl||[]).filter(b=>{
-    if(!b.statut) return false;
-    const bwk=cleSemaineJS(new Date(b.debut+'T12:00:00'));
-    return bwk===sem.num;
-  });
-  const drillHtml=drillBlocs.length?drillBlocs.map(b=>{
-    const ico=b.statut==='Réalisé'?'✅':'⏭';
-    const t=b.debut?b.debut.slice(11,16):'';
-    return `<div class="drill-item"><span class="drill-ico">${ico}</span><span class="drill-name">${es(b.titre)}</span><span class="drill-time">${t}</span></div>`;
-  }).join(''):('<div style="padding:8px 11px;font-size:12px;color:var(--muted);font-style:italic">Aucun bloc marqué cette semaine</div>');
-  html+=`<div class="drill-list" id="drill-list">${drillHtml}</div>`;
+  // "dont X sessions projet" sous le score card
+  const nbProjSessions=projLabels.reduce((acc,l)=>{const h=parProjet[l]||[];const w=h[idx]||{realises:0};return acc+(w.realises||0);},0);
+  if(nbProjSessions>0)html+=`<div style="text-align:center;font-size:11px;color:var(--muted);margin:-10px 16px 10px;cursor:pointer" onclick="toggleDrill()">dont ${nbProjSessions} session${nbProjSessions>1?'s':''} projet ›</div>`;
+  html+=`<div class="drill-list" id="drill-list"></div>`;
 
   // Projets
   if(labels.length){
@@ -1570,16 +1558,28 @@ async function toggleDrill(){
   const lun=sem.num;
   const dim=new Date(lun+'T12:00:00');dim.setDate(dim.getDate()+6);
   const r=await gas('get_semaine',{debut:lun,fin:iso(dim)});
-  const blocs=(r.blocs||[]).filter(b=>b.statut);
-  if(!blocs.length){
-    el.innerHTML='<div style="padding:8px 11px;font-size:12px;color:var(--muted);font-style:italic">Aucun bloc marqu\u00e9 cette semaine</div>';
-  } else {
-    el.innerHTML=blocs.map(b=>{
-      const ico=b.statut==='\u0052\u00e9alis\u00e9'?'\u2705':'\u23ed';
-      const t=b.debut?b.debut.slice(11,16):'';
-      return `<div class="drill-item"><span class="drill-ico">${ico}</span><span class="drill-name">${es(b.titre)}</span><span class="drill-time">${t}</span></div>`;
-    }).join('');
-  }
+  const EXCL=['loyer','etf','pea','investissement'];
+  const ROUT=['Sport','Menage','M\u00e9nage','Lecture','Masque LED','Confiance','TikTok'];
+  const isRout=t=>ROUT.some(k=>t.includes(k));
+  const projBlocs=(r.blocs||[]).filter(b=>b.statut&&!isRout(b.titre)&&!EXCL.some(k=>b.titre.toLowerCase().includes(k)));
+  if(!projBlocs.length){el.innerHTML='<div style="padding:8px 11px;font-size:12px;color:var(--muted);font-style:italic">Aucune session projet marqu\u00e9e</div>';return;}
+  const grouped={};
+  projBlocs.forEach(b=>{
+    const proj=S.pr.find(p=>b.titre.includes(p.nom)||p.nom.includes(b.titre));
+    const key=proj?proj.nom:b.titre;
+    if(!grouped[key])grouped[key]={realises:0,reportes:0,heures:0};
+    if(b.statut==='R\u00e9alis\u00e9'){
+      grouped[key].realises++;
+      if(b.debut&&b.fin)grouped[key].heures+=(new Date(b.fin)-new Date(b.debut))/3600000;
+    } else grouped[key].reportes++;
+  });
+  let h='';
+  Object.keys(grouped).forEach(nom=>{
+    const g=grouped[nom];
+    if(g.realises>0)h+=`<div class="drill-item"><span class="drill-ico">\u2705</span><span class="drill-name">${es(nom)}</span><span class="drill-time">${fmtH(g.heures)} \u00b7 ${g.realises} sess.</span></div>`;
+    if(g.reportes>0)h+=`<div class="drill-item"><span class="drill-ico">\u23ed</span><span class="drill-name">${es(nom)}</span><span class="drill-time">report\u00e9 \u00b7 ${g.reportes}\u00d7</span></div>`;
+  });
+  el.innerHTML=h;
 }
 
 function toggleStp(id){
