@@ -1656,6 +1656,7 @@ async function initPushSubscription(){
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(()=>initPushSubscription()).catch(()=>{}));
 document.addEventListener('DOMContentLoaded',()=>{
   initDash();
+  initPushSubscription();
   const fab=document.getElementById('fab');if(fab)fab.style.display='none';
   // Splash
   const sp=document.getElementById('splash');
