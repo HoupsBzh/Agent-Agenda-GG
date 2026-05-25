@@ -555,6 +555,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
     </div>
   </div>
   <div class="sgrp" style="margin-top:18px">
+    <div class="sgt">Notifications</div>
+    <div class="sc">
+      <div class="sr" style="cursor:default;flex-direction:column;align-items:flex-start;gap:6px">
+        <span style="font-size:11px;color:var(--muted)">Si tu ne reçois plus les notifications push, utilise ce bouton après avoir autorisé les notifications dans Chrome.</span>
+        <button class="btn bcu bsm" onclick="reactiverNotifs()">🔔 Réactiver les notifications</button>
+        <span id="notif-status" style="font-size:11px;color:var(--muted)"></span>
+      </div>
+    </div>
+  </div>
+  <div class="sgrp" style="margin-top:18px">
     <div class="sgt">URL GAS</div>
     <div class="sc">
       <div class="sr" style="flex-direction:column;align-items:flex-start;gap:6px;cursor:default">
@@ -1650,6 +1660,41 @@ async function initPushSubscription(){
     });
   }catch(e){
     console.error('Push init error:',e);
+  }
+}
+
+async function reactiverNotifs(){
+  const st=document.getElementById('notif-status');
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){
+    toast('\u274c Notifications non support\u00e9es sur cet appareil',true);return;
+  }
+  if(st)st.textContent='Demande de permission\u2026';
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){
+      if(st)st.textContent='\u274c Permission refus\u00e9e — autorise dans les r\u00e9glages Chrome';
+      toast('\u274c Permission refus\u00e9e',true);return;
+    }
+    if(st)st.textContent='Cr\u00e9ation de la souscription\u2026';
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(sub){await sub.unsubscribe();}
+    sub=await reg.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:b64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    if(st)st.textContent='Envoi au serveur\u2026';
+    const r=await gas('save_push_subscription',{subscription:sub.toJSON(),userAgent:navigator.userAgent});
+    if(r.success){
+      if(st)st.textContent='\u2705 Notifications activ\u00e9es !';
+      toast('\uD83D\uDD14 Notifications r\u00e9activ\u00e9es !');
+    } else {
+      if(st)st.textContent='\u274c Erreur sauvegarde GAS';
+      toast('\u274c Erreur : '+(r.error||'?'),true);
+    }
+  }catch(e){
+    if(st)st.textContent='\u274c '+e.message;
+    toast('\u274c '+e.message,true);
   }
 }
   
